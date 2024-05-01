@@ -1,5 +1,6 @@
 use super::{GetTextError, GetTextResult, TextSource};
 use crate::text::TextTree;
+use quick_xml::{events::Event, Reader};
 use ureq;
 
 pub struct Scaife {}
@@ -18,10 +19,29 @@ impl TextSource for Scaife {
             .into_string()
             .map_err(|_| GetTextError::EncodingError)?;
 
-        println!("{}", body);
-        Ok(TextTree {
-            subtexts: vec![Box::new("dupa")],
-            name: None,
-        })
+        let mut reader = quick_xml::Reader::from_str(&body);
+        let mut buf = Vec::new();
+
+        parse_body(&mut reader, &mut buf)
     }
+}
+
+fn parse_body(reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>) -> GetTextResult {
+    loop {
+        match reader.read_event_into(buf) {
+            Ok(Event::Start(e)) if e.name().0 == "body".as_bytes() => break,
+            Err(_) => panic!("Missing body"),
+            _ => (),
+        }
+    }
+
+    let body_span = reader
+        .read_to_end(quick_xml::name::QName("body".as_bytes()))
+        .unwrap();
+    println!("element: {:?}", body_span);
+
+    Ok(TextTree {
+        name: None,
+        subtexts: vec![],
+    })
 }
