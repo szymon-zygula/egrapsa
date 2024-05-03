@@ -3,7 +3,7 @@ use super::{GetTextResult, TextSource};
 struct Gutenberg {}
 
 impl TextSource for Gutenberg {
-    fn get_text(&self, id: &str) -> GetTextResult {
+    fn get_text(&self, _id: &str) -> GetTextResult {
         todo!()
     }
 }

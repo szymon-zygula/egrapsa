@@ -1,4 +1,5 @@
 use clap::{Parser, Subcommand};
+use egrapsa::formatters::{latex::Latex, TextFormatter};
 use egrapsa::text_sources::{scaife::Scaife, TextSource};
 
 #[derive(Parser)]
@@ -28,7 +29,8 @@ fn main() {
     match subcommand {
         Subcommands::Scaife { identifier } => {
             let source = Scaife {};
-            source.get_text(&identifier).unwrap();
+            let text = source.get_text(&identifier).unwrap();
+            println!("{}", Latex::format(&text));
         }
     }
 }
