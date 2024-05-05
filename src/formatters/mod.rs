@@ -1,7 +1,9 @@
-use crate::text::TextTree;
+use crate::text::TextParent;
 
 pub trait TextFormatter {
-    fn format(text: &TextTree) -> String;
+    fn title(self, title: Option<String>) -> Self;
+    fn author(self, author: Option<String>) -> Self;
+    fn format(&self, text: &TextParent) -> String;
 }
 
 pub mod latex;

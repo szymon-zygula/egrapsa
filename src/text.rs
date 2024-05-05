@@ -43,13 +43,25 @@ impl TextNode for &str {
     }
 }
 
+#[derive(Debug, Clone, Copy)]
+pub enum TextNodeKind {
+    Book,
+    Chapter,
+    Section,
+    Subsection,
+    Paragraph,
+    Note,
+    Deleted,
+}
+
 #[derive(Debug)]
-pub struct TextTree {
+pub struct TextParent {
     pub name: Option<String>,
+    pub kind: TextNodeKind,
     pub subtexts: Vec<Box<dyn TextNode>>,
 }
 
-impl TextNode for TextTree {
+impl TextNode for TextParent {
     fn name(&self) -> Option<&String> {
         self.name.as_ref()
     }
@@ -64,6 +76,7 @@ impl TextNode for TextTree {
     fn remove_new_lines(&self) -> Box<dyn TextNode> {
         Box::new(Self {
             name: self.name.clone(),
+            kind: self.kind,
             subtexts: self
                 .subtexts
                 .iter()
@@ -73,11 +86,37 @@ impl TextNode for TextTree {
     }
 
     fn format_for_latex(&self) -> String {
-        self.subtexts
+        let mut formatted: String = self
+            .subtexts
             .iter()
             .map(|subtext| subtext.format_for_latex())
-            .collect::<Vec<_>>()
-            .join("\n")
+            .collect();
+
+        match self.kind {
+            TextNodeKind::Book => {
+                // let mut text = String::from("\\maketitle\n");
+                // text.push('}');
+                // text.push_str(&formatted);
+                // formatted = text;
+            }
+            TextNodeKind::Chapter => {}
+            TextNodeKind::Section => {
+                let name = self.name.as_ref().map(|s| s.as_str()).unwrap_or("");
+                let mut text = String::from(r"\section{");
+                text.push_str(name);
+                text.push('}');
+                text.push_str(&formatted);
+                formatted = text;
+            }
+            TextNodeKind::Subsection => {}
+            TextNodeKind::Paragraph => {
+                formatted.push_str("\n\n");
+            }
+            TextNodeKind::Note => {}
+            TextNodeKind::Deleted => {}
+        }
+
+        formatted
     }
 }
 

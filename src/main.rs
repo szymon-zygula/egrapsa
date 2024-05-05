@@ -16,6 +16,10 @@ enum Subcommands {
     Scaife {
         #[arg(short, long)]
         identifier: String,
+        #[arg(short, long)]
+        title: Option<String>,
+        #[arg(short, long)]
+        author: Option<String>,
     },
 }
 
@@ -27,10 +31,11 @@ fn main() {
     };
 
     match subcommand {
-        Subcommands::Scaife { identifier } => {
+        Subcommands::Scaife { identifier, title, author } => {
             let source = Scaife {};
             let text = source.get_text(&identifier).unwrap();
-            println!("{}", Latex::format(&text));
+            let latex = Latex::new().title(title).author(author);
+            println!("{}", latex.format(&text));
         }
     }
 }

@@ -1,4 +1,4 @@
-use crate::text::TextTree;
+use crate::text::TextParent;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -11,7 +11,7 @@ pub enum GetTextError {
     ParseError,
 }
 
-type GetTextResult = Result<TextTree, GetTextError>;
+type GetTextResult = Result<TextParent, GetTextError>;
 
 pub trait TextSource {
     fn get_text(&self, id: &str) -> GetTextResult;

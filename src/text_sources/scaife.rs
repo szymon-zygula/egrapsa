@@ -1,5 +1,5 @@
 use super::{GetTextError, GetTextResult, TextSource};
-use crate::text::{Footnote, Gap, LineNumber, ParagraphNumber, TextNode, TextTree};
+use crate::text::{Footnote, Gap, LineNumber, ParagraphNumber, TextNode, TextNodeKind, TextParent};
 use quick_xml::{
     events::{BytesEnd, BytesStart, Event},
     name::QName,
@@ -38,8 +38,8 @@ impl TextSource for Scaife {
         expect_opening_tag(reader, buf, "text");
         expect_opening_tag(reader, buf, "body");
 
-        let starting_div = read_starting_div(reader, buf);
-        let section = read_text(reader, buf, "div");
+        let starting_div = read_starting_div(reader, buf).to_owned();
+        let section = read_text(reader, buf, starting_div);
 
         expect_closing_tag(reader, buf, "body");
         expect_closing_tag(reader, buf, "text");
@@ -103,32 +103,32 @@ fn read_starting_div<'a>(reader: &mut Reader<&[u8]>, buf: &'a mut Vec<u8>) -> By
     }
 }
 
-fn read_text(reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>, start_tag: &str) -> TextTree {
+fn read_text(reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>, start_tag: BytesStart) -> TextParent {
     let mut subtexts = Vec::<Box<dyn TextNode>>::new();
     loop {
         match reader.read_event_into(buf) {
             Ok(Event::Start(tag)) => match name_to_str(&tag.name()) {
                 "p" => {
-                    let name = name_to_str(&tag.name()).to_string();
-                    let text = read_text(reader, buf, &name);
+                    let tag = tag.to_owned();
+                    let text = read_text(reader, buf, tag);
                     subtexts.push(Box::new(text));
                 }
                 "div" => {
                     // TODO: differentiate between sections, chapters, etc.
-                    let name = name_to_str(&tag.name()).to_string();
-                    let text = read_text(reader, buf, &name);
+                    let tag = tag.to_owned();
+                    let text = read_text(reader, buf, tag);
                     subtexts.push(Box::new(text));
                 }
                 "del" => {
                     // TODO: find out what this tag means
-                    let name = name_to_str(&tag.name()).to_string();
-                    let text = read_text(reader, buf, &name);
+                    let tag = tag.to_owned();
+                    let text = read_text(reader, buf, tag);
                     subtexts.push(Box::new(text));
                 }
                 "note" => {
                     expect_attribute(&tag, "type", "footnote");
-                    let name = name_to_str(&tag.name()).to_string();
-                    let text = read_text(reader, buf, &name);
+                    let tag = tag.to_owned();
+                    let text = read_text(reader, buf, tag);
                     subtexts.push(Box::new(Footnote(text.to_string())));
                 }
                 name @ _ => {
@@ -136,7 +136,7 @@ fn read_text(reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>, start_tag: &str) -> 
                 }
             },
             Ok(Event::End(tag)) => {
-                ensure_tag_end(&tag, start_tag);
+                ensure_tag_end(&tag, &start_tag);
                 break;
             }
             Ok(Event::Text(content)) => subtexts.push(Box::new(
@@ -150,8 +150,9 @@ fn read_text(reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>, start_tag: &str) -> 
         }
     }
 
-    TextTree {
+    TextParent {
         name: None,
+        kind: get_text_kind(&start_tag),
         subtexts,
     }
 }
@@ -162,8 +163,8 @@ fn ensure_tag_name(tag: &BytesStart, name: &str) {
     }
 }
 
-fn ensure_tag_end(tag: &BytesEnd, start_tag: &str) {
-    if name_to_str(&tag.name()) != start_tag {
+fn ensure_tag_end(tag: &BytesEnd, start_tag: &BytesStart) {
+    if tag.name() != start_tag.name() {
         panic!(
             "Expected closing tag {:?}, found {:?}",
             start_tag.name(),
@@ -217,4 +218,22 @@ fn to_u32(string: &str) -> u32 {
         .trim_matches(|c: char| !c.is_digit(10))
         .parse()
         .unwrap()
+}
+
+fn get_text_kind(tag: &BytesStart) -> TextNodeKind {
+    match name_to_str(&tag.name()) {
+        "p" => TextNodeKind::Paragraph,
+        "note" => TextNodeKind::Note,
+        "del" => TextNodeKind::Deleted,
+        "div" => match get_attr_val(tag, "type").as_str() {
+            "edition" => TextNodeKind::Book,
+            "textpart" => match get_attr_val(tag, "subtype").as_str() {
+                "section" => TextNodeKind::Section,
+                "chapter" => TextNodeKind::Chapter,
+                name => panic!("Invalid div subtype for text kind: {name}"),
+            },
+            name => panic!("Invalid div type for text kind: {name}"),
+        },
+        name => panic!("Invalid tag type for text kind: {name}"),
+    }
 }
