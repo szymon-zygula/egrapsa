@@ -1,7 +1,8 @@
 use super::{GetTextError, GetTextResult, TextSource};
-use crate::text::{Footnote, LineNumber, ParagraphNumber, TextNode, TextTree};
+use crate::text::{Footnote, Gap, LineNumber, ParagraphNumber, TextNode, TextTree};
 use quick_xml::{
     events::{BytesEnd, BytesStart, Event},
+    name::QName,
     Reader,
 };
 use ureq;
@@ -36,9 +37,9 @@ impl TextSource for Scaife {
         expect_opening_tag(reader, buf, "TEI");
         expect_opening_tag(reader, buf, "text");
         expect_opening_tag(reader, buf, "body");
-        expect_opening_div(reader, buf, "edition");
 
-        let section = try_read_section(reader, buf);
+        let starting_div = read_starting_div(reader, buf);
+        let section = read_text(reader, buf, "div");
 
         expect_closing_tag(reader, buf, "body");
         expect_closing_tag(reader, buf, "text");
@@ -95,22 +96,39 @@ fn expect_attribute(tag: &BytesStart, attr_name: &str, attr_value: &str) {
     }
 }
 
-fn try_read_section(reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>) -> TextTree {
-    let tag = expect_opening_tag(reader, buf, "div");
-    expect_attribute(&tag, "type", "textpart");
-    expect_attribute(&tag, "subtype", "section");
+fn read_starting_div<'a>(reader: &mut Reader<&[u8]>, buf: &'a mut Vec<u8>) -> BytesStart<'a> {
+    match reader.read_event_into(buf) {
+        Ok(Event::Start(tag)) => tag,
+        other => panic!("Expected opening <div> tag, found {:?}", other),
+    }
+}
 
+fn read_text(reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>, start_tag: &str) -> TextTree {
     let mut subtexts = Vec::<Box<dyn TextNode>>::new();
     loop {
         match reader.read_event_into(buf) {
-            Ok(Event::Start(tag)) => match std::str::from_utf8(tag.name().0).unwrap() {
+            Ok(Event::Start(tag)) => match name_to_str(&tag.name()) {
                 "p" => {
-                    let text = try_read_text(reader, buf, "p");
+                    let name = name_to_str(&tag.name()).to_string();
+                    let text = read_text(reader, buf, &name);
+                    subtexts.push(Box::new(text));
+                }
+                "div" => {
+                    // TODO: differentiate between sections, chapters, etc.
+                    let name = name_to_str(&tag.name()).to_string();
+                    let text = read_text(reader, buf, &name);
+                    subtexts.push(Box::new(text));
+                }
+                "del" => {
+                    // TODO: find out what this tag means
+                    let name = name_to_str(&tag.name()).to_string();
+                    let text = read_text(reader, buf, &name);
                     subtexts.push(Box::new(text));
                 }
                 "note" => {
                     expect_attribute(&tag, "type", "footnote");
-                    let text = try_read_text(reader, buf, "note");
+                    let name = name_to_str(&tag.name()).to_string();
+                    let text = read_text(reader, buf, &name);
                     subtexts.push(Box::new(Footnote(text.to_string())));
                 }
                 name @ _ => {
@@ -118,46 +136,23 @@ fn try_read_section(reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>) -> TextTree {
                 }
             },
             Ok(Event::End(tag)) => {
-                ensure_end_tag_name(&tag, "div");
+                ensure_tag_end(&tag, start_tag);
                 break;
             }
+            Ok(Event::Text(content)) => subtexts.push(Box::new(
+                std::str::from_utf8(&content.into_inner())
+                    .unwrap()
+                    .to_string(),
+            )),
             Ok(Event::Empty(tag)) => subtexts.push(read_emty_tag(&tag)),
             Err(e) => panic!("Expected text, got error: {e}"),
             ev => panic!("Missing text, got event: {ev:?}"),
         }
     }
 
-    expect_closing_tag(reader, buf, "div");
-
     TextTree {
         name: None,
         subtexts,
-    }
-}
-
-// Expects starting_tag to be read already
-fn try_read_text(reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>, start_tag: &str) -> TextTree {
-    let mut texts = Vec::<Box<dyn TextNode>>::new();
-    loop {
-        match reader.read_event_into(buf) {
-            Ok(Event::Text(content)) => texts.push(Box::new(
-                std::str::from_utf8(&content.into_inner())
-                    .unwrap()
-                    .to_string(),
-            )),
-            Ok(Event::End(end)) => {
-                ensure_end_tag_name(&end, start_tag);
-                break;
-            }
-            Ok(Event::Empty(tag)) => texts.push(read_emty_tag(&tag)),
-            Err(e) => panic!("Expected text, got error: {e}"),
-            ev => panic!("Missing text, got event: {ev:?}"),
-        }
-    }
-
-    TextTree {
-        name: None,
-        subtexts: texts,
     }
 }
 
@@ -167,9 +162,13 @@ fn ensure_tag_name(tag: &BytesStart, name: &str) {
     }
 }
 
-fn ensure_end_tag_name(tag: &BytesEnd, name: &str) {
-    if tag.name().0 != name.as_bytes() {
-        panic!("Expected closing tag </{name}>, found {:?}", tag.name());
+fn ensure_tag_end(tag: &BytesEnd, start_tag: &str) {
+    if name_to_str(&tag.name()) != start_tag {
+        panic!(
+            "Expected closing tag {:?}, found {:?}",
+            start_tag.name(),
+            tag.name()
+        );
     }
 }
 
@@ -188,17 +187,34 @@ fn expect_eof(reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>) {
 }
 
 fn read_emty_tag(tag: &BytesStart) -> Box<dyn TextNode> {
-    match std::str::from_utf8(tag.name().0).unwrap() {
+    match name_to_str(&tag.name()) {
         "pb" => {
-            let n: u32 = get_attr_val(&tag, "n").parse().unwrap();
+            let n: u32 = to_u32(&get_attr_val(&tag, "n"));
             Box::new(ParagraphNumber(n))
         }
         "lb" => {
-            let n: u32 = get_attr_val(&tag, "n").parse().unwrap();
+            let n: u32 = to_u32(&get_attr_val(&tag, "n"));
             Box::new(LineNumber(n))
+        }
+        "gap" => {
+            let reason = get_attr_val(tag, "reason");
+            Box::new(Gap(reason))
         }
         name @ _ => {
             panic!("Unexpected tag found inside section: {:?}", name)
         }
     }
+}
+
+fn name_to_str<'a>(name: &QName<'a>) -> &'a str {
+    std::str::from_utf8(name.0).unwrap()
+}
+
+// Sometimes paragraph/line numbers include stray characters, e.g. "15."
+fn to_u32(string: &str) -> u32 {
+    string
+        .trim()
+        .trim_matches(|c: char| !c.is_digit(10))
+        .parse()
+        .unwrap()
 }

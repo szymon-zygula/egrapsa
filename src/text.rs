@@ -21,7 +21,7 @@ impl TextNode for String {
     }
 
     fn format_for_latex(&self) -> String {
-        self.clone()
+        self.clone().replace('#', r"\#")
     }
 }
 
@@ -39,7 +39,7 @@ impl TextNode for &str {
     }
 
     fn format_for_latex(&self) -> String {
-        TextNode::to_string(self)
+        TextNode::to_string(self).format_for_latex()
     }
 }
 
@@ -98,7 +98,7 @@ impl TextNode for Footnote {
     }
 
     fn format_for_latex(&self) -> String {
-        format!("\\footnote{{{}}}", self.0)
+        format!("\\footnote{{{}}}", self.0.format_for_latex())
     }
 }
 
@@ -120,7 +120,7 @@ impl TextNode for ParagraphNumber {
 
     fn format_for_latex(&self) -> String {
         let mut text = String::from("\n");
-        text.push_str(r"\centering{\footnotesize\color{gray} p.");
+        text.push_str(r"\alignedmarginpar{\footnotesize\color{gray} p.");
         text.push_str(&self.0.to_string());
         text.push_str("}\n");
         text
@@ -144,6 +144,31 @@ impl TextNode for LineNumber {
     }
 
     fn format_for_latex(&self) -> String {
-        String::new()
+        let mut text = String::from("\n");
+        text.push_str(r"\alignedmarginpar{\footnotesize\color{gray}");
+        text.push_str(&self.0.to_string());
+        text.push_str("}\n");
+        text
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct Gap(pub String);
+
+impl TextNode for Gap {
+    fn name(&self) -> Option<&String> {
+        None
+    }
+
+    fn to_string(&self) -> String {
+        self.0.clone()
+    }
+
+    fn remove_new_lines(&self) -> Box<dyn TextNode> {
+        self.0.remove_new_lines()
+    }
+
+    fn format_for_latex(&self) -> String {
+        self.0.format_for_latex()
     }
 }

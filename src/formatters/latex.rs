@@ -9,13 +9,21 @@ impl TextFormatter for Latex {
 r"
 \documentclass[a4paper,12pt]{book}
 
-\usepackage{xcolor, graphicx,amssymb, amstext, amsmath, epstopdf, booktabs, verbatim, gensymb, geometry, appendix, natbib, lmodern}
+\usepackage{marginnote, lipsum, scrextend, xcolor, graphicx, amssymb, amstext, amsmath, epstopdf, booktabs, verbatim, gensymb, geometry, appendix, natbib, lmodern}
 \geometry{a4paper}
 
 \usepackage[utf8]{inputenc}
 \usepackage[greek.polutoniko]{babel}
 \usepackage{fontspec}
 \usepackage{TheanoOldStyle}
+
+\newcommand{\alignedmarginpar}[1]{%
+    \ifthispageodd{%
+        \marginpar{\raggedright\small #1}
+    }{%
+        \marginpar{\raggedleft\small #1}
+    }%
+}
 
 \begin{document}
 ",
