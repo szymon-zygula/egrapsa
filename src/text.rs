@@ -48,10 +48,16 @@ pub enum TextNodeKind {
     Book,
     Chapter,
     Section,
+    SubSection,
     Subsection,
     Paragraph,
     Note,
     Deleted,
+    Label,
+    Quote,
+    BlockQuote,
+    Italics,
+    Simple,
 }
 
 #[derive(Debug)]
@@ -108,12 +114,45 @@ impl TextNode for TextParent {
                 text.push_str(&formatted);
                 formatted = text;
             }
+            TextNodeKind::SubSection => {
+                let name = self.name.as_ref().map(|s| s.as_str()).unwrap_or("");
+                let mut text = String::from(r"\subsection{");
+                text.push_str(name);
+                text.push('}');
+                text.push_str(&formatted);
+                formatted = text;
+            }
             TextNodeKind::Subsection => {}
             TextNodeKind::Paragraph => {
                 formatted.push_str("\n\n");
             }
             TextNodeKind::Note => {}
             TextNodeKind::Deleted => {}
+            TextNodeKind::Label => {
+                let mut text = String::from(r"\textbf{");
+                text.push_str(&formatted);
+                text.push_str("}");
+                formatted = text;
+            }
+            TextNodeKind::Quote => {
+                let mut text = String::from(r"\say{");
+                text.push_str(&formatted);
+                text.push_str("}");
+                formatted = text;
+            }
+            TextNodeKind::BlockQuote => {
+                let mut text = String::from(r"\begin{displayquote}");
+                text.push_str(&formatted);
+                text.push_str(r"\end{displayquote}");
+                formatted = text;
+            }
+            TextNodeKind::Italics => {
+                let mut text = String::from(r"\textit{");
+                text.push_str(&formatted);
+                text.push_str("}");
+                formatted = text;
+            }
+            TextNodeKind::Simple => {}
         }
 
         formatted

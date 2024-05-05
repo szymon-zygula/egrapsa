@@ -85,17 +85,6 @@ fn expect_closing_tag<'a>(reader: &mut Reader<&[u8]>, buf: &'a mut Vec<u8>, tag_
     }
 }
 
-fn expect_opening_div(reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>, div_type: &str) {
-    let div = expect_opening_tag(reader, buf, "div");
-    expect_attribute(&div, "type", div_type);
-}
-
-fn expect_attribute(tag: &BytesStart, attr_name: &str, attr_value: &str) {
-    if *tag.try_get_attribute(attr_name).unwrap().unwrap().value != *attr_value.as_bytes() {
-        panic!("Expected <... {attr_name}=\"{attr_value}\" ...>, got {tag:?}");
-    }
-}
-
 fn read_starting_div<'a>(reader: &mut Reader<&[u8]>, buf: &'a mut Vec<u8>) -> BytesStart<'a> {
     match reader.read_event_into(buf) {
         Ok(Event::Start(tag)) => tag,
@@ -108,25 +97,13 @@ fn read_text(reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>, start_tag: BytesStar
     loop {
         match reader.read_event_into(buf) {
             Ok(Event::Start(tag)) => match name_to_str(&tag.name()) {
-                "p" => {
+                "p" | "div" | "del" | "foreign" | "label" | "q" | "title" | "quote" | "l"
+                | "cit" => {
                     let tag = tag.to_owned();
                     let text = read_text(reader, buf, tag);
                     subtexts.push(Box::new(text));
                 }
-                "div" => {
-                    // TODO: differentiate between sections, chapters, etc.
-                    let tag = tag.to_owned();
-                    let text = read_text(reader, buf, tag);
-                    subtexts.push(Box::new(text));
-                }
-                "del" => {
-                    // TODO: find out what this tag means
-                    let tag = tag.to_owned();
-                    let text = read_text(reader, buf, tag);
-                    subtexts.push(Box::new(text));
-                }
-                "note" => {
-                    expect_attribute(&tag, "type", "footnote");
+                "note" | "bibl" => {
                     let tag = tag.to_owned();
                     let text = read_text(reader, buf, tag);
                     subtexts.push(Box::new(Footnote(text.to_string())));
@@ -154,12 +131,6 @@ fn read_text(reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>, start_tag: BytesStar
         name: None,
         kind: get_text_kind(&start_tag),
         subtexts,
-    }
-}
-
-fn ensure_tag_name(tag: &BytesStart, name: &str) {
-    if tag.name().0 != name.as_bytes() {
-        panic!("Expected opening tag <{name}>, found {:?}", tag.name());
     }
 }
 
@@ -201,6 +172,8 @@ fn read_emty_tag(tag: &BytesStart) -> Box<dyn TextNode> {
             let reason = get_attr_val(tag, "reason");
             Box::new(Gap(reason))
         }
+        "milestone" => Box::new(String::new()),
+        "space" => Box::new(" "),
         name @ _ => {
             panic!("Unexpected tag found inside section: {:?}", name)
         }
@@ -222,13 +195,21 @@ fn to_u32(string: &str) -> u32 {
 
 fn get_text_kind(tag: &BytesStart) -> TextNodeKind {
     match name_to_str(&tag.name()) {
+        "foreign" => TextNodeKind::Simple,
+        "label" => TextNodeKind::Label,
+        "title" => TextNodeKind::Italics,
         "p" => TextNodeKind::Paragraph,
-        "note" => TextNodeKind::Note,
+        "note" | "bibl" => TextNodeKind::Note,
         "del" => TextNodeKind::Deleted,
+        "l" => TextNodeKind::Simple,
+        "quote" => TextNodeKind::Simple,
+        "q" => TextNodeKind::Quote,
+        "cit" => TextNodeKind::BlockQuote,
         "div" => match get_attr_val(tag, "type").as_str() {
             "edition" => TextNodeKind::Book,
             "textpart" => match get_attr_val(tag, "subtype").as_str() {
-                "section" => TextNodeKind::Section,
+                // section -> paragraph is correct, it's basically how Scaife treats sections
+                "section" => TextNodeKind::Paragraph,
                 "chapter" => TextNodeKind::Chapter,
                 name => panic!("Invalid div subtype for text kind: {name}"),
             },

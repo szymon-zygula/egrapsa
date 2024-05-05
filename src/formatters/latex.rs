@@ -29,7 +29,7 @@ impl TextFormatter for Latex {
             r"
 \documentclass[a5paper,12pt]{book}
 
-\usepackage{marginnote, lipsum, scrextend, xcolor, graphicx, amssymb, amstext, amsmath, epstopdf, booktabs, verbatim, gensymb, geometry, appendix, natbib, lmodern}
+\usepackage{csquotes, dirtytalk, marginnote, lipsum, scrextend, xcolor, graphicx, amssymb, amstext, amsmath, epstopdf, booktabs, verbatim, gensymb, geometry, appendix, natbib, lmodern}
 \geometry{a5paper}
 
 \usepackage[utf8]{inputenc}
@@ -71,7 +71,7 @@ impl TextFormatter for Latex {
         );
 
         if self.title.is_some() {
-            text.push_str(r"\maketitle");
+            text.push_str("\\maketitle\n");
         }
 
         text.push_str(&text_tree.format_for_latex());
