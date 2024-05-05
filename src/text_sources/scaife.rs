@@ -98,7 +98,7 @@ fn read_text(reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>, start_tag: BytesStar
         match reader.read_event_into(buf) {
             Ok(Event::Start(tag)) => match name_to_str(&tag.name()) {
                 "p" | "div" | "del" | "foreign" | "label" | "q" | "title" | "quote" | "l"
-                | "cit" => {
+                | "cit" | "said" | "add" => {
                     let tag = tag.to_owned();
                     let text = read_text(reader, buf, tag);
                     subtexts.push(Box::new(text));
@@ -195,14 +195,13 @@ fn to_u32(string: &str) -> u32 {
 
 fn get_text_kind(tag: &BytesStart) -> TextNodeKind {
     match name_to_str(&tag.name()) {
-        "foreign" => TextNodeKind::Simple,
+        "foreign" | "quote" | "add" => TextNodeKind::Simple,
+        "l" => TextNodeKind::Line,
         "label" => TextNodeKind::Label,
         "title" => TextNodeKind::Italics,
-        "p" => TextNodeKind::Paragraph,
+        "p" | "said" => TextNodeKind::Paragraph,
         "note" | "bibl" => TextNodeKind::Note,
         "del" => TextNodeKind::Deleted,
-        "l" => TextNodeKind::Simple,
-        "quote" => TextNodeKind::Simple,
         "q" => TextNodeKind::Quote,
         "cit" => TextNodeKind::BlockQuote,
         "div" => match get_attr_val(tag, "type").as_str() {
@@ -210,6 +209,7 @@ fn get_text_kind(tag: &BytesStart) -> TextNodeKind {
             "textpart" => match get_attr_val(tag, "subtype").as_str() {
                 // section -> paragraph is correct, it's basically how Scaife treats sections
                 "section" => TextNodeKind::Paragraph,
+                "book" => TextNodeKind::Section,
                 "chapter" => TextNodeKind::Chapter,
                 name => panic!("Invalid div subtype for text kind: {name}"),
             },

@@ -57,6 +57,7 @@ pub enum TextNodeKind {
     Quote,
     BlockQuote,
     Italics,
+    Line,
     Simple,
 }
 
@@ -131,7 +132,7 @@ impl TextNode for TextParent {
             TextNodeKind::Label => {
                 let mut text = String::from(r"\textbf{");
                 text.push_str(&formatted);
-                text.push_str("}");
+                text.push_str("} ");
                 formatted = text;
             }
             TextNodeKind::Quote => {
@@ -151,6 +152,9 @@ impl TextNode for TextParent {
                 text.push_str(&formatted);
                 text.push_str("}");
                 formatted = text;
+            }
+            TextNodeKind::Line => {
+                formatted.push_str("\n\\\\");
             }
             TextNodeKind::Simple => {}
         }
