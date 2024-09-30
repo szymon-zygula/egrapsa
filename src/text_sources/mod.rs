@@ -17,6 +17,4 @@ pub trait TextSource {
     fn get_text(&self, id: &str) -> GetTextResult;
 }
 
-pub mod gutenberg;
-pub mod gutenberg_de;
 pub mod scaife;
