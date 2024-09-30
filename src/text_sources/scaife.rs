@@ -24,6 +24,8 @@ impl TextSource for Scaife {
             .map_err(|_| GetTextError::EncodingError)?;
 
         // println!("{}", body);
+        let mut out = std::fs::File::create("debug.xml").unwrap();
+        std::io::Write::write_all(&mut out, body.as_bytes()).unwrap();
 
         let reader = &mut quick_xml::Reader::from_str(&body);
         reader.trim_text(true);
@@ -94,11 +96,12 @@ fn read_starting_div<'a>(reader: &mut Reader<&[u8]>, buf: &'a mut Vec<u8>) -> By
 
 fn read_text(reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>, start_tag: BytesStart) -> TextParent {
     let mut subtexts = Vec::<Box<dyn TextNode>>::new();
+    let mut name: Option<Box<dyn TextNode>> = None;
     loop {
         match reader.read_event_into(buf) {
             Ok(Event::Start(tag)) => match name_to_str(&tag.name()) {
                 "p" | "div" | "del" | "foreign" | "label" | "q" | "title" | "quote" | "l"
-                | "cit" | "said" | "add" => {
+                | "cit" | "said" | "add" | "corr" => {
                     let tag = tag.to_owned();
                     let text = read_text(reader, buf, tag);
                     subtexts.push(Box::new(text));
@@ -108,8 +111,13 @@ fn read_text(reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>, start_tag: BytesStar
                     let text = read_text(reader, buf, tag);
                     subtexts.push(Box::new(Footnote(text.to_string())));
                 }
+                "head" => {
+                    let tag = tag.to_owned();
+                    let text = read_text(reader, buf, tag);
+                    name = Some(Box::new(text));
+                }
                 name @ _ => {
-                    panic!("Unexpected tag found inside section: {:?}", name)
+                    panic!("Unexpected tag found inside section: <{}>", name)
                 }
             },
             Ok(Event::End(tag)) => {
@@ -121,14 +129,14 @@ fn read_text(reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>, start_tag: BytesStar
                     .unwrap()
                     .to_string(),
             )),
-            Ok(Event::Empty(tag)) => subtexts.push(read_emty_tag(&tag)),
+            Ok(Event::Empty(tag)) => subtexts.push(read_empty_tag(&tag)),
             Err(e) => panic!("Expected text, got error: {e}"),
             ev => panic!("Missing text, got event: {ev:?}"),
         }
     }
 
     TextParent {
-        name: None,
+        name,
         kind: get_text_kind(&start_tag),
         subtexts,
     }
@@ -158,19 +166,14 @@ fn expect_eof(reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>) {
     }
 }
 
-fn read_emty_tag(tag: &BytesStart) -> Box<dyn TextNode> {
+fn read_empty_tag(tag: &BytesStart) -> Box<dyn TextNode> {
     match name_to_str(&tag.name()) {
-        "pb" => {
-            let n: u32 = to_u32(&get_attr_val(&tag, "n"));
-            Box::new(ParagraphNumber(n))
-        }
-        "lb" => {
-            let n: u32 = to_u32(&get_attr_val(&tag, "n"));
-            Box::new(LineNumber(n))
-        }
+        "pb" => Box::new(ParagraphNumber(get_attr_val(&tag, "n"))),
+        "lb" => Box::new(LineNumber(get_attr_val(&tag, "n"))),
         "gap" => {
             let reason = get_attr_val(tag, "reason");
-            Box::new(Gap(reason))
+            let rend = get_attr_val(tag, "rend");
+            Box::new(Gap { reason, rend })
         }
         "milestone" => Box::new(String::new()),
         "space" => Box::new(" "),
@@ -184,18 +187,10 @@ fn name_to_str<'a>(name: &QName<'a>) -> &'a str {
     std::str::from_utf8(name.0).unwrap()
 }
 
-// Sometimes paragraph/line numbers include stray characters, e.g. "15."
-fn to_u32(string: &str) -> u32 {
-    string
-        .trim()
-        .trim_matches(|c: char| !c.is_digit(10))
-        .parse()
-        .unwrap()
-}
-
 fn get_text_kind(tag: &BytesStart) -> TextNodeKind {
     match name_to_str(&tag.name()) {
-        "foreign" | "quote" | "add" => TextNodeKind::Simple,
+        "head" | "foreign" | "quote" | "add" => TextNodeKind::Simple,
+        "corr" => TextNodeKind::Corrected,
         "l" => TextNodeKind::Line,
         "label" => TextNodeKind::Label,
         "title" => TextNodeKind::Italics,

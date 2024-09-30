@@ -74,6 +74,7 @@ impl TextFormatter for Latex {
             text.push_str("\\maketitle\n");
         }
 
+        text.push_str("\\newpage\\null\\thispagestyle{empty}\\newpage\n");
         text.push_str(&text_tree.format_for_latex());
         text.push_str(r"\end{document}");
 
