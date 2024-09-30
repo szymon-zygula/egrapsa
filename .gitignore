@@ -1,1 +1,6 @@
 /target
+*.xml
+*.pdf
+*.aux
+*.log
+*.tex
