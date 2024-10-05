@@ -177,11 +177,14 @@ impl TextFormatter for Latex {
             r"
 \clearpage\null\thispagestyle{empty}
 \Ifthispageodd{%
+    \clearpage\null\thispagestyle{empty}
+    \clearpage\null\thispagestyle{empty}
 }{%
     \clearpage\null\thispagestyle{empty}
 }%
-\renewcommand{\contentsname}{\center Index}
+\renewcommand{\contentsname}{Index}
 \renewcommand{\cftchapleader}{\cftdotfill{\cftdotsep}}
+\center
 \tableofcontents",
         );
         text.push_str(r"\end{document}");
