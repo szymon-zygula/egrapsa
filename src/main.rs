@@ -15,12 +15,12 @@ struct Cli {
 #[derive(Subcommand)]
 enum Subcommands {
     Scaife {
-        #[arg(short, long)]
+        #[arg(short, long, value_parser, num_args = 1.., value_delimiter = '|')]
         identifiers: Vec<String>,
+        #[arg(short, long, value_parser, num_args = 1.., value_delimiter = '|')]
+        titles: Vec<String>,
         #[arg(short, long)]
         main_title: Option<String>,
-        #[arg(short, long)]
-        titles: Option<String>,
         #[arg(short, long)]
         author: Option<String>,
         #[arg(short, long)]

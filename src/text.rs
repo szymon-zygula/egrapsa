@@ -44,6 +44,9 @@ pub enum TextNodeKind {
     Line,
     Simple,
     Corrected,
+    Symbol,
+    Speaker,
+    DialogueEntry
 }
 
 #[derive(Debug)]
@@ -70,6 +73,20 @@ impl TextNode for TextParent {
             .collect();
 
         match self.kind {
+            TextNodeKind::Speaker => {
+                let mut text = String::from(r"\textbf{");
+                text.push_str(&formatted);
+                text.push_str("}· ");
+                formatted = text;
+            }
+            TextNodeKind::DialogueEntry => {
+            }
+            TextNodeKind::Symbol => {
+                let mut text = String::from(r"\textit{");
+                text.push_str(&formatted);
+                text.push_str("}");
+                formatted = text;
+            }
             TextNodeKind::Book => {
                 // Title etc. are taken from input parameters
             }

@@ -130,7 +130,7 @@ fn read_text(reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>, start_tag: BytesStar
         match reader.read_event_into(buf) {
             Ok(Event::Start(tag)) => match name_to_str(&tag.name()) {
                 "p" | "div" | "del" | "foreign" | "label" | "q" | "title" | "quote" | "l"
-                | "cit" | "said" | "add" | "corr" => {
+                | "cit" | "said" | "add" | "corr" | "num" | "sp" | "speaker" => {
                     let tag = tag.to_owned();
                     let text = read_text(reader, buf, tag);
                     subtexts.push(Box::new(text));
@@ -234,6 +234,9 @@ fn name_to_str<'a>(name: &QName<'a>) -> &'a str {
 fn get_text_kind(tag: &BytesStart) -> TextNodeKind {
     match name_to_str(&tag.name()) {
         "head" | "foreign" | "quote" | "add" => TextNodeKind::Simple,
+        "sp" => TextNodeKind::DialogueEntry,
+        "speaker" => TextNodeKind::Speaker,
+        "num" => TextNodeKind::Symbol,
         "corr" => TextNodeKind::Corrected,
         "l" => TextNodeKind::Line,
         "label" => TextNodeKind::Label,

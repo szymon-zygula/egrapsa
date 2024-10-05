@@ -116,11 +116,12 @@ impl TextFormatter for Latex {
         for work in &self.works {
             text.push_str("\\chapter{");
             text.push_str(&work.title);
-            text.push_str("}\n\\chaptertitle");
+            text.push_str("}\n");
             // text.push_str("\\newpage\\null\\thispagestyle{empty}\\newpage\n");
             text.push_str(&work.text.format_for_latex());
-            text.push_str(r"\end{document}");
         }
+
+        text.push_str(r"\end{document}");
 
         text
     }
