@@ -1,5 +1,7 @@
 use super::{GetTextError, GetTextResult, TextSource};
-use crate::text::{Footnote, Gap, LineNumber, ParagraphNumber, TextNode, TextNodeKind, TextParent};
+use crate::text::{
+    Footnote, Gap, LineNumber, Milestone, ParagraphNumber, TextNode, TextNodeKind, TextParent,
+};
 use quick_xml::{
     events::{BytesEnd, BytesStart, Event},
     name::QName,
@@ -94,6 +96,22 @@ fn read_starting_div<'a>(reader: &mut Reader<&[u8]>, buf: &'a mut Vec<u8>) -> By
     }
 }
 
+fn fix_text(text: &str) -> String {
+    text.replace("&gt;", "")
+        .replace("&lt;", "") // Remove junk
+        .replace(",", ", ")
+        .replace(",  ", ", ")
+        .replace(",   ", ", ")
+        .replace(".", ". ")
+        .replace(".  ", ". ")
+        .replace(".   ", ". ")
+        .replace(" — ", "—")
+        .replace("— ", "—")
+        .replace(" —", "—")
+        .replace("—", "---")
+    // A quick way to normalize spaces
+}
+
 fn read_text(reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>, start_tag: BytesStart) -> TextParent {
     let mut subtexts = Vec::<Box<dyn TextNode>>::new();
     let mut name: Option<Box<dyn TextNode>> = None;
@@ -124,11 +142,9 @@ fn read_text(reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>, start_tag: BytesStar
                 ensure_tag_end(&tag, &start_tag);
                 break;
             }
-            Ok(Event::Text(content)) => subtexts.push(Box::new(
-                std::str::from_utf8(&content.into_inner())
-                    .unwrap()
-                    .to_string(),
-            )),
+            Ok(Event::Text(content)) => subtexts.push(Box::new(fix_text(
+                std::str::from_utf8(&content.into_inner()).unwrap(),
+            ))),
             Ok(Event::Empty(tag)) => subtexts.push(read_empty_tag(&tag)),
             Err(e) => panic!("Expected text, got error: {e}"),
             ev => panic!("Missing text, got event: {ev:?}"),
@@ -158,6 +174,12 @@ fn get_attr_val(tag: &BytesStart, name: &str) -> String {
         .to_string()
 }
 
+fn get_attr_val_opt(tag: &BytesStart, name: &str) -> Option<String> {
+    tag.try_get_attribute(name)
+        .unwrap()
+        .map(|attr| std::str::from_utf8(&attr.value).unwrap().to_string())
+}
+
 fn expect_eof(reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>) {
     let event = reader.read_event_into(buf).unwrap();
 
@@ -175,7 +197,18 @@ fn read_empty_tag(tag: &BytesStart) -> Box<dyn TextNode> {
             let rend = get_attr_val(tag, "rend");
             Box::new(Gap { reason, rend })
         }
-        "milestone" => Box::new(String::new()),
+        "milestone" => {
+            let unit = get_attr_val(tag, "unit");
+            let number = get_attr_val_opt(tag, "n");
+            let ed = get_attr_val_opt(tag, "ed");
+            let resp = get_attr_val_opt(tag, "resp");
+            Box::new(Milestone {
+                unit,
+                number,
+                ed,
+                resp,
+            })
+        }
         "space" => Box::new(" "),
         name @ _ => {
             panic!("Unexpected tag found inside section: {:?}", name)

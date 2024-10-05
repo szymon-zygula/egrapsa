@@ -1,3 +1,5 @@
+use itertools::*;
+
 pub trait TextNode: std::fmt::Debug {
     fn to_string(&self) -> String;
 
@@ -64,6 +66,7 @@ impl TextNode for TextParent {
             .subtexts
             .iter()
             .map(|subtext| subtext.format_for_latex())
+            .filter(|subtext| !subtext.is_empty())
             .collect();
 
         match self.kind {
@@ -175,11 +178,43 @@ impl TextNode for LineNumber {
     }
 
     fn format_for_latex(&self) -> String {
-        let mut text = String::from("\n");
-        text.push_str(r"\alignedmarginpar{\footnotesize\color{gray}");
+        let mut text = String::from(r"\alignedmarginpar{\footnotesize\color{gray}");
         text.push_str(&self.0);
-        text.push_str("}\n");
+        text.push_str("}");
         text
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct Milestone {
+    pub unit: String,
+    pub number: Option<String>,
+    pub ed: Option<String>,
+    pub resp: Option<String>,
+}
+
+impl TextNode for Milestone {
+    fn to_string(&self) -> String {
+        if let Some(number) = &self.number {
+            format!("({})", number)
+        } else {
+            String::new()
+        }
+    }
+
+    fn format_for_latex(&self) -> String {
+        if self.unit == "page" || self.unit == "speech" {
+            return String::new();
+        }
+
+        if let Some(number) = &self.number {
+            let mut text = String::from(r"\alignedmarginpar{\footnotesize\color{gray}");
+            text.push_str(number);
+            text.push_str("}");
+            text
+        } else {
+            String::new()
+        }
     }
 }
 
