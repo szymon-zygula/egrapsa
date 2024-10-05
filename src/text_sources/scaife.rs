@@ -109,6 +109,17 @@ fn fix_text(text: &str) -> String {
         .replace("— ", "—")
         .replace(" —", "—")
         .replace("—", "---")
+        .replace(" ?", "?")
+        .replace("?  ", "? ")
+        .replace(" ;", ";") // Greek question mark
+        .replace(";  ", "; ")
+        .replace(" :", ":") // Colon
+        .replace(":  ", ": ")
+        .replace(" ;", ";") // Semicolon
+        .replace(";  ", "; ")
+        .replace(" ·", "·") // Raised point (Greek colon)
+        .replace("·  ", "· ")
+
     // A quick way to normalize spaces
 }
 
