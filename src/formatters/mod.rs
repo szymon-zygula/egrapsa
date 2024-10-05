@@ -2,6 +2,8 @@ use crate::text::TextParent;
 
 pub struct Work {
     pub title: String,
+    // It's popular to have bilingual work names in Greek books
+    pub alt_title: Option<String>,
     pub text: TextParent
 }
 

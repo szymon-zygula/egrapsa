@@ -19,6 +19,8 @@ enum Subcommands {
         identifiers: Vec<String>,
         #[arg(short, long, value_parser, num_args = 1.., value_delimiter = '|')]
         titles: Vec<String>,
+        #[arg(short = 'A', long, value_parser, num_args = 1.., value_delimiter = '|')]
+        alt_titles: Vec<String>,
         #[arg(short, long)]
         main_title: Option<String>,
         #[arg(short, long)]
@@ -40,6 +42,7 @@ fn main() {
             identifiers,
             main_title,
             titles,
+            alt_titles,
             author,
             catchwords,
         } => {
@@ -48,10 +51,20 @@ fn main() {
                 .author(author)
                 .catchwords(catchwords);
 
-            for (id, title) in identifiers.iter().zip_eq(titles) {
+            let alt_titles = if alt_titles.is_empty() {
+                vec![None; titles.len()]
+            } else {
+                alt_titles.into_iter().map(|x| Some(x)).collect()
+            };
+
+            for ((id, title), alt_title) in identifiers.iter().zip_eq(titles).zip_eq(alt_titles) {
                 let source = Scaife {};
                 let text = source.get_text(id).unwrap();
-                latex = latex.add_work(Work { text, title });
+                latex = latex.add_work(Work {
+                    title,
+                    alt_title,
+                    text,
+                });
             }
 
             println!("{}", latex.format());

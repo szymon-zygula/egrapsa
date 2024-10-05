@@ -1,5 +1,3 @@
-use itertools::*;
-
 pub trait TextNode: std::fmt::Debug {
     fn to_string(&self) -> String;
 

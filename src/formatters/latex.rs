@@ -45,6 +45,7 @@ impl TextFormatter for Latex {
 \usepackage{csquotes, dirtytalk, marginnote, lipsum, scrextend, xcolor, graphicx, amssymb, amstext, amsmath, epstopdf, booktabs, verbatim, gensymb, geometry, appendix, natbib, lmodern}
 \usepackage[pagestyles]{titlesec}
 \usepackage{fancyhdr}
+\usepackage{etoolbox}
 \geometry{a5paper}
 
 \usepackage[utf8]{inputenc}
@@ -63,12 +64,19 @@ impl TextFormatter for Latex {
 
 \date{}
 
-\titleformat{\chapter}[display]{\normalfont\bfseries}{}{0pt}{\Huge\center\MakeUppercase}
+\titlespacing*{\chapter}{0pt}{0pt}{15pt}
+
+\newcommand{\likechapter}[1]{\centerline{\huge #1}\vspace{50pt}}
+
+\titleformat{\chapter}[display]{\normalfont\bfseries}{}{0pt}{\Huge\center}
 \renewcommand{\chaptermark}[1]{\markboth{#1}{}}
 
+\newcommand{\altchapter}{}
 \fancyhf{}
 \fancyhead[LE, RO]{\thepage}
-\fancyhead[C]{\leftmark.}
+\fancyhead[CE]{\leftmark}
+\fancyhead[CO]{\altchapter}
+
 ",
         );
 
@@ -82,6 +90,23 @@ impl TextFormatter for Latex {
 
         text.push_str(
             r"
+\fancypagestyle{plain}{
+\fancyhf{}
+\fancyhead[RO, LE]{\thepage}
+                      ",
+        );
+
+        if self.catchwords {
+            text.push_str(
+                r"
+\fancyfoot[R]{\usebox\NextWordBox}
+                      ",
+            );
+        }
+
+        text.push_str(
+            r"
+}
 \renewcommand\headrulewidth{0pt}
 \pagestyle{fancy}
                       ",
@@ -126,7 +151,10 @@ impl TextFormatter for Latex {
             );
             text.push_str(r"\chapter{");
             text.push_str(&work.title);
-            text.push_str("}\n");
+            text.push_str(".}\n");
+            text.push_str(r"\renewcommand{\altchapter}{");
+            text.push_str(work.alt_title.as_ref().unwrap_or(&work.title));
+            text.push_str(r".}\likechapter{\altchapter}");
             text.push_str(&work.text.format_for_latex());
         }
 
