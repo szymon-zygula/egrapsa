@@ -64,24 +64,28 @@ impl TextFormatter for Latex {
 \date{}
 
 \titleformat{\chapter}[display]{\normalfont\bfseries}{}{0pt}{\Huge\center\MakeUppercase}
+\renewcommand{\chaptermark}[1]{\markboth{#1}{}}
 
-\newpagestyle{mystyle}
-{\sethead[\thepage][][\chaptertitle]{}{}{\thepage}}
-\pagestyle{mystyle}
-
+\fancyhf{}
+\fancyhead[LE, RO]{\thepage}
+\fancyhead[C]{\leftmark}
 ",
         );
 
         if self.catchwords {
             text.push_str(
                 r"
-\fancyhf{}
 \fancyfoot[R]{\usebox\NextWordBox}
+                      ",
+            );
+        }
+
+            text.push_str(
+                r"
 \renewcommand\headrulewidth{0pt}
 \pagestyle{fancy}
                       ",
             );
-        }
 
         if let Some(author) = self.author.as_ref() {
             text.push_str(r"\author{");
@@ -112,7 +116,7 @@ impl TextFormatter for Latex {
         for work in &self.works {
             text.push_str("\\chapter{");
             text.push_str(&work.title);
-            text.push_str("}\n");
+            text.push_str("}\n\\chaptertitle");
             // text.push_str("\\newpage\\null\\thispagestyle{empty}\\newpage\n");
             text.push_str(&work.text.format_for_latex());
             text.push_str(r"\end{document}");
