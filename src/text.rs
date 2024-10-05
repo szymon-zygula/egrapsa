@@ -38,6 +38,7 @@ pub enum TextNodeKind {
     Label,
     Quote,
     BlockQuote,
+    Sic,
     Italics,
     Line,
     Simple,
@@ -71,6 +72,13 @@ impl TextNode for TextParent {
             .collect();
 
         match self.kind {
+            TextNodeKind::Sic => {
+                // Sic seems to be ignored by original perseus reader, but is rendered by Scaife.
+                // Example occurence in a text:
+                // <sic><corr>ἑαυτόν·</corr></sic><corr>ἑαυτόν·</corr>
+                // This seems nonsensical. We'll ignore <sic> for now.
+                formatted = String::new()
+            }
             TextNodeKind::Speaker => {
                 let mut text = String::from(r"\textbf{");
                 text.push_str(&formatted);
@@ -119,7 +127,9 @@ impl TextNode for TextParent {
             }
             TextNodeKind::Note => {}
             TextNodeKind::Deleted => {}
-            TextNodeKind::Corrected => {}
+            TextNodeKind::Corrected => {
+                formatted = format!(" {} ", formatted);
+            }
             TextNodeKind::Label => {
                 let mut text = String::from(r"\textbf{");
                 text.push_str(&formatted);
@@ -127,10 +137,7 @@ impl TextNode for TextParent {
                 formatted = text;
             }
             TextNodeKind::Quote => {
-                let mut text = String::from(r"\say{");
-                text.push_str(&formatted);
-                text.push_str("}");
-                formatted = text;
+                formatted = format!(" {} ", formatted);
             }
             TextNodeKind::BlockQuote => {
                 let mut text = String::from(r"\begin{displayquote}");

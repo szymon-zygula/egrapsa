@@ -25,7 +25,6 @@ impl TextSource for Scaife {
             .into_string()
             .map_err(|_| GetTextError::EncodingError)?;
 
-        // println!("{}", body);
         let mut out = std::fs::File::create("debug.xml").unwrap();
         std::io::Write::write_all(&mut out, body.as_bytes()).unwrap();
 
@@ -130,7 +129,7 @@ fn read_text(reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>, start_tag: BytesStar
         match reader.read_event_into(buf) {
             Ok(Event::Start(tag)) => match name_to_str(&tag.name()) {
                 "p" | "div" | "del" | "foreign" | "label" | "q" | "title" | "quote" | "l"
-                | "cit" | "said" | "add" | "corr" | "num" | "sp" | "speaker" => {
+                | "cit" | "said" | "add" | "corr" | "num" | "sp" | "speaker" | "sic" => {
                     let tag = tag.to_owned();
                     let text = read_text(reader, buf, tag);
                     subtexts.push(Box::new(text));
@@ -201,6 +200,7 @@ fn expect_eof(reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>) {
 
 fn read_empty_tag(tag: &BytesStart) -> Box<dyn TextNode> {
     match name_to_str(&tag.name()) {
+        "l" => Box::new(""), // Sometimes <l/> appears for not reason. Seems to be some junk.
         "pb" => Box::new(ParagraphNumber(get_attr_val(&tag, "n"))),
         "lb" => Box::new(LineNumber(get_attr_val(&tag, "n"))),
         "gap" => {
@@ -222,7 +222,7 @@ fn read_empty_tag(tag: &BytesStart) -> Box<dyn TextNode> {
         }
         "space" => Box::new(" "),
         name @ _ => {
-            panic!("Unexpected tag found inside section: {:?}", name)
+            panic!("Unexpected tag found inside section: <{}>", name)
         }
     }
 }
@@ -235,6 +235,7 @@ fn get_text_kind(tag: &BytesStart) -> TextNodeKind {
     match name_to_str(&tag.name()) {
         "head" | "foreign" | "quote" | "add" => TextNodeKind::Simple,
         "sp" => TextNodeKind::DialogueEntry,
+        "sic" => TextNodeKind::Sic,
         "speaker" => TextNodeKind::Speaker,
         "num" => TextNodeKind::Symbol,
         "corr" => TextNodeKind::Corrected,
