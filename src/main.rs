@@ -23,6 +23,8 @@ enum Subcommands {
         titles: Option<String>,
         #[arg(short, long)]
         author: Option<String>,
+        #[arg(short, long)]
+        catchwords: bool,
     },
 }
 
@@ -39,8 +41,12 @@ fn main() {
             main_title,
             titles,
             author,
+            catchwords,
         } => {
-            let mut latex = Latex::new().title(main_title).author(author);
+            let mut latex = Latex::new()
+                .title(main_title)
+                .author(author)
+                .catchwords(catchwords);
 
             for (id, title) in identifiers.iter().zip_eq(titles) {
                 let source = Scaife {};

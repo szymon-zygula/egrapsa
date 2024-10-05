@@ -5,6 +5,7 @@ pub struct Latex {
     title: Option<String>,
     author: Option<String>,
     works: Vec<Work>,
+    catchwords: bool,
 }
 
 impl Latex {
@@ -13,6 +14,7 @@ impl Latex {
             title: None,
             author: None,
             works: Vec::default(),
+            catchwords: false,
         }
     }
 }
@@ -31,6 +33,10 @@ impl TextFormatter for Latex {
         self
     }
 
+    fn catchwords(self, catchwords: bool) -> Self {
+        Self { catchwords, ..self }
+    }
+
     fn format(&self) -> String {
         let mut text = String::from(
             r"
@@ -38,12 +44,14 @@ impl TextFormatter for Latex {
 
 \usepackage{csquotes, dirtytalk, marginnote, lipsum, scrextend, xcolor, graphicx, amssymb, amstext, amsmath, epstopdf, booktabs, verbatim, gensymb, geometry, appendix, natbib, lmodern}
 \usepackage[pagestyles]{titlesec}
+\usepackage{fancyhdr}
 \geometry{a5paper}
 
 \usepackage[utf8]{inputenc}
 \usepackage[greek.polutoniko]{babel}
 \usepackage{fontspec}
 \usepackage{TheanoOldStyle}
+\usepackage{fwlw}
 
 \newcommand{\alignedmarginpar}[1]{%
     \Ifthispageodd{%
@@ -63,6 +71,17 @@ impl TextFormatter for Latex {
 
 ",
         );
+
+        if self.catchwords {
+            text.push_str(
+                r"
+\fancyhf{}
+\fancyfoot[R]{\usebox\NextWordBox}
+\renewcommand\headrulewidth{0pt}
+\pagestyle{fancy}
+                      ",
+            );
+        }
 
         if let Some(author) = self.author.as_ref() {
             text.push_str(r"\author{");
