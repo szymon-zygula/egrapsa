@@ -68,7 +68,7 @@ impl TextFormatter for Latex {
 
 \fancyhf{}
 \fancyhead[LE, RO]{\thepage}
-\fancyhead[C]{\leftmark}
+\fancyhead[C]{\leftmark.}
 ",
         );
 
