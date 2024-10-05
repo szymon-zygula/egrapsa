@@ -80,12 +80,12 @@ impl TextFormatter for Latex {
             );
         }
 
-            text.push_str(
-                r"
+        text.push_str(
+            r"
 \renewcommand\headrulewidth{0pt}
 \pagestyle{fancy}
                       ",
-            );
+        );
 
         if let Some(author) = self.author.as_ref() {
             text.push_str(r"\author{");
@@ -114,10 +114,19 @@ impl TextFormatter for Latex {
         text.push_str("\\newpage\\null\\thispagestyle{empty}\\newpage\n");
 
         for work in &self.works {
-            text.push_str("\\chapter{");
+            text.push_str(
+                r"
+    \Ifthispageodd{%
+        \clearpage\null\thispagestyle{empty}
+    }{%
+        \clearpage\null
+        \clearpage\null\thispagestyle{empty}
+    }%
+                          ",
+            );
+            text.push_str(r"\chapter{");
             text.push_str(&work.title);
             text.push_str("}\n");
-            // text.push_str("\\newpage\\null\\thispagestyle{empty}\\newpage\n");
             text.push_str(&work.text.format_for_latex());
         }
 
