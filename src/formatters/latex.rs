@@ -1,9 +1,10 @@
-use super::TextFormatter;
+use super::{TextFormatter, Work};
 use crate::text::*;
 
 pub struct Latex {
     title: Option<String>,
     author: Option<String>,
+    works: Vec<Work>,
 }
 
 impl Latex {
@@ -11,6 +12,7 @@ impl Latex {
         Self {
             title: None,
             author: None,
+            works: Vec::default(),
         }
     }
 }
@@ -24,12 +26,18 @@ impl TextFormatter for Latex {
         Self { author, ..self }
     }
 
-    fn format(&self, text_tree: &TextParent) -> String {
+    fn add_work(mut self, work: Work) -> Self {
+        self.works.push(work);
+        self
+    }
+
+    fn format(&self) -> String {
         let mut text = String::from(
             r"
 \documentclass[a5paper,12pt]{book}
 
 \usepackage{csquotes, dirtytalk, marginnote, lipsum, scrextend, xcolor, graphicx, amssymb, amstext, amsmath, epstopdf, booktabs, verbatim, gensymb, geometry, appendix, natbib, lmodern}
+\usepackage[pagestyles]{titlesec}
 \geometry{a5paper}
 
 \usepackage[utf8]{inputenc}
@@ -46,6 +54,12 @@ impl TextFormatter for Latex {
 }
 
 \date{}
+
+\titleformat{\chapter}[display]{\normalfont\bfseries}{}{0pt}{\Huge\center\MakeUppercase}
+
+\newpagestyle{mystyle}
+{\sethead[\thepage][][\chaptertitle]{}{}{\thepage}}
+\pagestyle{mystyle}
 
 ",
         );
@@ -75,8 +89,15 @@ impl TextFormatter for Latex {
         }
 
         text.push_str("\\newpage\\null\\thispagestyle{empty}\\newpage\n");
-        text.push_str(&text_tree.format_for_latex());
-        text.push_str(r"\end{document}");
+
+        for work in &self.works {
+            text.push_str("\\chapter{");
+            text.push_str(&work.title);
+            text.push_str("}\n");
+            // text.push_str("\\newpage\\null\\thispagestyle{empty}\\newpage\n");
+            text.push_str(&work.text.format_for_latex());
+            text.push_str(r"\end{document}");
+        }
 
         text
     }
