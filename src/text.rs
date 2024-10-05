@@ -95,7 +95,7 @@ impl TextNode for TextParent {
                     .as_ref()
                     .map(|s| s.format_for_latex())
                     .unwrap_or_default();
-                let mut text = String::from(r"\section{");
+                let mut text = String::from(r"\section*{");
                 text.push_str(&name);
                 text.push('}');
                 text.push_str(&formatted);
@@ -107,7 +107,7 @@ impl TextNode for TextParent {
                     .as_ref()
                     .map(|s| s.format_for_latex())
                     .unwrap_or_default();
-                let mut text = String::from(r"\subsection{");
+                let mut text = String::from(r"\subsection*{");
                 text.push_str(&name);
                 text.push('}');
                 text.push_str(&formatted);

@@ -53,6 +53,7 @@ impl TextFormatter for Latex {
 \usepackage{fontspec}
 \usepackage{TheanoOldStyle}
 \usepackage{fwlw}
+\usepackage{tocloft}
 
 \newcommand{\alignedmarginpar}[1]{%
     \Ifthispageodd{%
@@ -66,7 +67,8 @@ impl TextFormatter for Latex {
 
 \titlespacing*{\chapter}{0pt}{0pt}{15pt}
 
-\newcommand{\likechapter}[1]{\centerline{\huge #1}\vspace{50pt}}
+\newcommand{\likechapter}[1]{{\center\huge #1 \\
+\vspace{50pt}}}
 
 \titleformat{\chapter}[display]{\normalfont\bfseries}{}{0pt}{\Huge\center}
 \renewcommand{\chaptermark}[1]{\markboth{#1}{}}
@@ -136,28 +138,52 @@ impl TextFormatter for Latex {
             text.push_str("\\maketitle\n");
         }
 
-        text.push_str("\\newpage\\null\\thispagestyle{empty}\\newpage\n");
-
-        for work in &self.works {
-            text.push_str(
-                r"
-    \Ifthispageodd{%
-        \clearpage\null\thispagestyle{empty}
-    }{%
-        \clearpage\null
-        \clearpage\null\thispagestyle{empty}
-    }%
+        for (i, work) in self.works.iter().enumerate() {
+            if i != 0 {
+                text.push_str(
+                    r"
+\Ifthispageodd{%
+    \clearpage\null\thispagestyle{empty}
+}{%
+    \clearpage\null
+    \clearpage\null\thispagestyle{empty}
+}%
                           ",
-            );
-            text.push_str(r"\chapter{");
+                );
+            }
+
+            text.push_str(r"\chapter");
+            if let Some(alt_title) = &work.alt_title {
+                text.push_str(&format!("[{} ({})]", work.title, alt_title));
+            }
+            text.push_str("{");
             text.push_str(&work.title);
             text.push_str(".}\n");
             text.push_str(r"\renewcommand{\altchapter}{");
             text.push_str(work.alt_title.as_ref().unwrap_or(&work.title));
-            text.push_str(r".}\likechapter{\altchapter}");
+            text.push_str(
+                r".}
+                \likechapter{\altchapter}
+
+                ",
+            );
+
             text.push_str(&work.text.format_for_latex());
         }
 
+        text.push_str(r"\renewcommand{\altchapter}{}");
+
+        text.push_str(
+            r"
+\clearpage\null\thispagestyle{empty}
+\Ifthispageodd{%
+}{%
+    \clearpage\null\thispagestyle{empty}
+}%
+\renewcommand{\contentsname}{\center Index}
+\renewcommand{\cftchapleader}{\cftdotfill{\cftdotsep}}
+\tableofcontents",
+        );
         text.push_str(r"\end{document}");
 
         text
