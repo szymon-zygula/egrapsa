@@ -74,9 +74,10 @@ impl TextFormatter for Latex {
 \renewcommand{\chaptermark}[1]{\markboth{#1}{}}
 
 \newcommand{\altchapter}{}
+\newcommand{\orgchapter}{}
 \fancyhf{}
 \fancyhead[LE, RO]{\thepage}
-\fancyhead[CE]{\leftmark}
+\fancyhead[CE]{\orgchapter}
 \fancyhead[CO]{\altchapter}
 
 ",
@@ -157,6 +158,9 @@ impl TextFormatter for Latex {
                 text.push_str(&format!("[{} ({})]", work.title, alt_title));
             }
             text.push_str("{");
+            text.push_str(&work.title);
+            text.push_str(".}\n");
+            text.push_str(r"\renewcommand{\orgchapter}{");
             text.push_str(&work.title);
             text.push_str(".}\n");
             text.push_str(r"\renewcommand{\altchapter}{");
