@@ -4,14 +4,14 @@ pub struct Work {
     pub title: String,
     // It's popular to have bilingual work names in Greek books
     pub alt_title: Option<String>,
-    pub text: TextParent
+    pub text: TextParent,
 }
 
 pub trait TextFormatter {
-    fn title(self, title: Option<String>) -> Self;
-    fn author(self, author: Option<String>) -> Self;
-    fn add_work(self, work: Work) -> Self;
-    fn catchwords(self, catchwords: bool) -> Self;
+    fn set_title(&mut self, title: Option<String>);
+    fn set_author(&mut self, author: Option<String>);
+    fn set_catchwords(&mut self, catchwords: bool);
+    fn add_work(&mut self, work: Work);
     fn format(&self) -> String;
 }
 

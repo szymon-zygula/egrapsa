@@ -20,21 +20,20 @@ impl Latex {
 }
 
 impl TextFormatter for Latex {
-    fn title(self, title: Option<String>) -> Self {
-        Self { title, ..self }
+    fn set_title(&mut self, title: Option<String>) {
+        self.title = title;
     }
 
-    fn author(self, author: Option<String>) -> Self {
-        Self { author, ..self }
+    fn set_author(&mut self, author: Option<String>) {
+        self.author = author;
     }
 
-    fn add_work(mut self, work: Work) -> Self {
+    fn set_catchwords(&mut self, catchwords: bool) {
+        self.catchwords = catchwords;
+    }
+
+    fn add_work(&mut self, work: Work) {
         self.works.push(work);
-        self
-    }
-
-    fn catchwords(self, catchwords: bool) -> Self {
-        Self { catchwords, ..self }
     }
 
     fn format(&self) -> String {
