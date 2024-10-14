@@ -172,9 +172,8 @@ impl TextNode for TextParent {
             TextNodeKind::Description => {}
         }
 
-        // Quick fix for missing spaces
         formatted = format!(" {} ", formatted);
-        formatted.replace("  ", " ")
+        fix_text(&formatted)
     }
 }
 
@@ -275,7 +274,7 @@ impl TextNode for Highlight {
             _ => panic!("Unknown <hi> rend type ({})", self.rend),
         };
 
-        format!("\\{}{{{}}}", mark, inner)
+        format!(" \\{}{{{}}} ", mark, inner)
     }
 }
 
@@ -296,9 +295,38 @@ impl TextNode for Gap {
 
     fn format_for_latex(&self) -> String {
         format!(
-            "{}\\footnote{{{}}}",
+            "{}\\footnote{{{}}} ",
             self.rend.as_ref().map(|x| x.as_str()).unwrap_or("[...]"),
             self.reason
         )
     }
+}
+
+fn fix_punctuation(text: &mut String, p: &str) {
+    // A quick way to normalize spaces
+    *text = text
+        .replace(p, &format!("{} ", p))
+        .replace(&format!(" {}", p), p)
+        .replace(&format!("{}   ", p), &format!("{} ", p))
+        .replace(&format!("{}  ", p), &format!("{} ", p));
+}
+
+pub fn fix_text(text: &str) -> String {
+    let mut text = text
+        .replace("&gt;", "")
+        .replace("&lt;", "") // Remove junk
+        .replace(" — ", "—")
+        .replace("— ", "—")
+        .replace(" —", "—")
+        .replace("—", "---");
+
+    fix_punctuation(&mut text, ",");
+    fix_punctuation(&mut text, ".");
+    fix_punctuation(&mut text, "?");
+    fix_punctuation(&mut text, ";");
+    fix_punctuation(&mut text, ";"); // Greek question mark
+    fix_punctuation(&mut text, ":");
+    fix_punctuation(&mut text, "·");
+
+    text
 }

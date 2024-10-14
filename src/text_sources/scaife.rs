@@ -1,7 +1,7 @@
 use super::{GetTextError, GetTextResult, TextSource};
 use crate::text::{
-    Footnote, Gap, Highlight, LineNumber, Milestone, ParagraphNumber, TextNode, TextNodeKind,
-    TextParent,
+    fix_text, Footnote, Gap, Highlight, LineNumber, Milestone, ParagraphNumber, TextNode,
+    TextNodeKind, TextParent,
 };
 use quick_xml::{
     events::{BytesEnd, BytesStart, Event},
@@ -94,33 +94,6 @@ fn read_starting_div<'a>(reader: &mut Reader<&[u8]>, buf: &'a mut Vec<u8>) -> By
         Ok(Event::Start(tag)) => tag,
         other => panic!("Expected opening <div> tag, found {:?}", other),
     }
-}
-
-fn fix_text(text: &str) -> String {
-    text.replace("&gt;", "")
-        .replace("&lt;", "") // Remove junk
-        .replace(",", ", ")
-        .replace(",  ", ", ")
-        .replace(",   ", ", ")
-        .replace(".", ". ")
-        .replace(".  ", ". ")
-        .replace(".   ", ". ")
-        .replace(" — ", "—")
-        .replace("— ", "—")
-        .replace(" —", "—")
-        .replace("—", "---")
-        .replace(" ?", "?")
-        .replace("?  ", "? ")
-        .replace(" ;", ";") // Greek question mark
-        .replace(";  ", "; ")
-        .replace(" :", ":") // Colon
-        .replace(":  ", ": ")
-        .replace(" ;", ";") // Semicolon
-        .replace(";  ", "; ")
-        .replace(" ·", "·") // Raised point (Greek colon)
-        .replace("·  ", "· ")
-
-    // A quick way to normalize spaces
 }
 
 fn read_text(reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>, start_tag: BytesStart) -> TextParent {
