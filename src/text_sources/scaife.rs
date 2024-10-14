@@ -1,6 +1,7 @@
 use super::{GetTextError, GetTextResult, TextSource};
 use crate::text::{
-    Footnote, Gap, LineNumber, Milestone, ParagraphNumber, TextNode, TextNodeKind, TextParent,
+    Footnote, Gap, Highlight, LineNumber, Milestone, ParagraphNumber, TextNode, TextNodeKind,
+    TextParent,
 };
 use quick_xml::{
     events::{BytesEnd, BytesStart, Event},
@@ -140,6 +141,15 @@ fn read_text(reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>, start_tag: BytesStar
                     let text = read_text(reader, buf, tag);
                     subtexts.push(Box::new(Footnote(text.to_string())));
                 }
+                "hi" => {
+                    let rend = get_attr_val(&tag, "rend");
+                    let tag = tag.to_owned();
+                    let text = read_text(reader, buf, tag);
+                    subtexts.push(Box::new(Highlight {
+                        rend,
+                        text: Box::new(text),
+                    }));
+                }
                 "head" => {
                     let tag = tag.to_owned();
                     let text = read_text(reader, buf, tag);
@@ -247,6 +257,7 @@ fn get_text_kind(tag: &BytesStart) -> TextNodeKind {
         "l" => TextNodeKind::Line,
         "label" => TextNodeKind::Label,
         "title" => TextNodeKind::Italics,
+        "hi" => TextNodeKind::Highlight,
         "p" | "said" => TextNodeKind::Paragraph,
         "note" | "bibl" => TextNodeKind::Note,
         "del" => TextNodeKind::Deleted,

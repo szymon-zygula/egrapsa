@@ -50,6 +50,7 @@ pub enum TextNodeKind {
     Date,
     Apparatus,
     Lemma,
+    Highlight
 }
 
 #[derive(Debug)]
@@ -133,6 +134,7 @@ impl TextNode for TextParent {
                 formatted.push_str("\n\n");
             }
             TextNodeKind::Note => {}
+            TextNodeKind::Highlight => {}
             TextNodeKind::Deleted => {}
             TextNodeKind::Corrected => {
                 formatted = format!(" {} ", formatted);
@@ -244,6 +246,28 @@ impl TextNode for Milestone {
         } else {
             String::new()
         }
+    }
+}
+
+#[derive(Debug)]
+pub struct Highlight {
+    pub rend: String,
+    pub text: Box<dyn TextNode>,
+}
+
+impl TextNode for Highlight {
+    fn to_string(&self) -> String {
+        self.text.to_string()
+    }
+
+    fn format_for_latex(&self) -> String {
+        let inner = self.text.format_for_latex();
+        let mark = match self.rend.as_str() {
+            "italics" => "textit",
+            _ => panic!("Unknown <hi> rend type ({})", self.rend),
+        };
+
+        format!("\\{}{{{}}}", mark, inner)
     }
 }
 
