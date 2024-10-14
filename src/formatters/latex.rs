@@ -29,6 +29,11 @@ impl Latex {
             }
         }
     }
+
+    // Replace some characters not likely to be found in fonts
+    fn normalize(text: String) -> String {
+        text.replace("ↄ", r"\rotatebox[origin=c]{180}{c}") // Roman numeral ↄ
+    }
 }
 
 impl TextFormatter for Latex {
@@ -214,6 +219,6 @@ impl TextFormatter for Latex {
         );
         text.push_str(r"\end{document}");
 
-        text
+        Self::normalize(text)
     }
 }
