@@ -1,0 +1,25 @@
+{
+    "name": "Ciceros's complete works",
+    "formatter_type": "Latex",
+    "formatter_config": {
+        "title": "Opera Omnia",
+        "author": "Marcus Tulius Cicero",
+        "catchwords": true,
+        "language": "Latin"
+    },
+    "source_type": "Scaife",
+    "work_infos": [
+        {
+            "title": "Pro P. Quinctio",
+            "identifier": "urn:cts:latinLit:phi0474.phi001.perseus-lat2:1-99"
+        },
+        {
+            "title": "Pro S. Roscio Amerino",
+            "identifier": "urn:cts:latinLit:phi0474.phi002.perseus-lat2:1-154"
+        },
+        {
+            "title": "Pro Q. Roscio Comoedo",
+            "identifier": "urn:cts:latinLit:phi0474.phi003.perseus-lat2:1-56"
+        }
+    ]
+}

@@ -141,18 +141,14 @@ impl TextNode for TextParent {
             TextNodeKind::Note => {}
             TextNodeKind::Highlight => {}
             TextNodeKind::Deleted => {}
-            TextNodeKind::Corrected => {
-                formatted = format!(" {} ", formatted);
-            }
+            TextNodeKind::Corrected => {}
             TextNodeKind::Label => {
                 let mut text = String::from(r"\textbf{");
                 text.push_str(&formatted);
                 text.push_str("} ");
                 formatted = text;
             }
-            TextNodeKind::Quote => {
-                formatted = format!(" {} ", formatted);
-            }
+            TextNodeKind::Quote => {}
             TextNodeKind::BlockQuote => {
                 let mut text = String::from(r"\begin{displayquote}");
                 text.push_str(&formatted);
@@ -176,7 +172,9 @@ impl TextNode for TextParent {
             TextNodeKind::Description => {}
         }
 
-        formatted
+        // Quick fix for missing spaces
+        formatted = format!(" {} ", formatted);
+        formatted.replace("  ", " ")
     }
 }
 
@@ -189,7 +187,7 @@ impl TextNode for Footnote {
     }
 
     fn format_for_latex(&self) -> String {
-        format!("\\footnote{{{}}}", self.0.format_for_latex())
+        format!("\\footnote{{{}}} ", self.0.format_for_latex())
     }
 }
 

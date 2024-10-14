@@ -1,4 +1,4 @@
-use crate::formatters::{latex, TextFormatter, Work};
+use crate::formatters::{latex, Language, TextFormatter, Work};
 use crate::text_sources::TextSource;
 use serde::{Deserialize, Serialize};
 
@@ -30,11 +30,12 @@ impl TextFormatterType {
     }
 }
 
-#[derive(Clone, Serialize, Deserialize)]
-struct FormatterConfig {
-    title: Option<String>,
-    author: Option<String>,
-    catchwords: bool,
+#[derive(Default, Clone, Serialize, Deserialize)]
+pub struct FormatterConfig {
+    pub title: Option<String>,
+    pub author: Option<String>,
+    pub catchwords: bool,
+    pub language: Language,
 }
 
 #[derive(Clone, Serialize, Deserialize)]
@@ -85,6 +86,7 @@ impl Config {
         formatter.set_title(config.title);
         formatter.set_author(config.author);
         formatter.set_catchwords(config.catchwords);
+        formatter.set_language(config.language);
 
         formatter
     }

@@ -1,39 +1,55 @@
-use super::{TextFormatter, Work};
+use super::{Language, TextFormatter, Work};
+use crate::config::FormatterConfig;
 use crate::text::*;
 
 pub struct Latex {
-    title: Option<String>,
-    author: Option<String>,
+    config: FormatterConfig,
     works: Vec<Work>,
-    catchwords: bool,
 }
 
 impl Latex {
     pub fn new() -> Self {
         Self {
-            title: None,
-            author: None,
+            config: FormatterConfig::default(),
             works: Vec::default(),
-            catchwords: false,
+        }
+    }
+
+    fn get_language_packages(&self) -> &str {
+        match self.config.language {
+            Language::Latin => {
+                r"
+\usepackage[latin]{babel}
+\usepackage[oldstyle, veryoldstyle]{kpfonts}"
+            }
+            Language::Greek => {
+                r"
+\usepackage[greek.polutoniko]{babel}
+\usepackage{TheanoOldStyle}"
+            }
         }
     }
 }
 
 impl TextFormatter for Latex {
     fn set_title(&mut self, title: Option<String>) {
-        self.title = title;
+        self.config.title = title;
     }
 
     fn set_author(&mut self, author: Option<String>) {
-        self.author = author;
+        self.config.author = author;
     }
 
     fn set_catchwords(&mut self, catchwords: bool) {
-        self.catchwords = catchwords;
+        self.config.catchwords = catchwords;
     }
 
     fn add_work(&mut self, work: Work) {
         self.works.push(work);
+    }
+
+    fn set_language(&mut self, language: Language) {
+        self.config.language = language;
     }
 
     fn format(&self) -> String {
@@ -47,10 +63,12 @@ impl TextFormatter for Latex {
 \usepackage{etoolbox}
 \geometry{a5paper}
 
-\usepackage[utf8]{inputenc}
-\usepackage[greek.polutoniko]{babel}
+\usepackage[utf8]{inputenc}",
+        );
+        text.push_str(self.get_language_packages());
+        text.push_str(
+            r"
 \usepackage{fontspec}
-\usepackage{TheanoOldStyle}
 \usepackage{fwlw}
 \usepackage{tocloft}
 
@@ -82,7 +100,7 @@ impl TextFormatter for Latex {
 ",
         );
 
-        if self.catchwords {
+        if self.config.catchwords {
             text.push_str(
                 r"
 \fancyfoot[R]{\usebox\NextWordBox}
@@ -98,7 +116,7 @@ impl TextFormatter for Latex {
                       ",
         );
 
-        if self.catchwords {
+        if self.config.catchwords {
             text.push_str(
                 r"
 \fancyfoot[R]{\usebox\NextWordBox}
@@ -114,13 +132,13 @@ impl TextFormatter for Latex {
                       ",
         );
 
-        if let Some(author) = self.author.as_ref() {
+        if let Some(author) = self.config.author.as_ref() {
             text.push_str(r"\author{");
             text.push_str(&author);
             text.push_str(r"}");
         }
 
-        if let Some(title) = self.title.as_ref() {
+        if let Some(title) = self.config.title.as_ref() {
             text.push_str(r"\title{");
             text.push_str(&title);
             text.push_str(r"}");
@@ -134,7 +152,7 @@ impl TextFormatter for Latex {
             ",
         );
 
-        if self.title.is_some() {
+        if self.config.title.is_some() {
             text.push_str("\\maketitle\n");
         }
 

@@ -9,3 +9,5 @@ Font selection.
 Replace chapters with parts
 Cache downloaded files
 Refactor TextNodeKind, formatting selection, generation in scaife etc. (so that it's not everywhere?).
+use long s option
+use old ligatures option
