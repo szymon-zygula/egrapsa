@@ -48,6 +48,7 @@ pub enum TextNodeKind {
     DialogueEntry,
     Regularized,
     Date,
+    Apparatus,
 }
 
 #[derive(Debug)]
@@ -82,6 +83,7 @@ impl TextNode for TextParent {
                 formatted = String::new()
             }
             TextNodeKind::Regularized => {}
+            TextNodeKind::Apparatus => {}
             TextNodeKind::Date => {}
             TextNodeKind::Speaker => {
                 let mut text = String::from(r"\textbf{");
