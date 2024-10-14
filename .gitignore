@@ -3,5 +3,6 @@
 *.pdf
 *.aux
 *.log
+*.toc
 *.tex
 *.json
