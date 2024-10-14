@@ -1,7 +1,11 @@
+BEFORE PRINTING:
 Line numbers and milestones and other numerations are displayed slightly too low.
 Line numbers and milestones and other numerations are too big?
-Font selection.
 Latin font with ligatures.
 Something really bad happens in ΨΕΥΔΟΣΟΦΙΣΤΗΣ Η ΣΟΛΟΙΚΙΣΤΗΣ with margin notes
+
+SECONDARY:
+Font selection.
 Replace chapters with parts
 Cache downloaded files
+Refactor TextNodeKind, formatting selection, generation in scaife etc. (so that it's not everywhere?).
