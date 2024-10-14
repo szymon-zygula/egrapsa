@@ -49,6 +49,7 @@ pub enum TextNodeKind {
     Regularized,
     Date,
     Apparatus,
+    Lemma,
 }
 
 #[derive(Debug)]
@@ -102,6 +103,7 @@ impl TextNode for TextParent {
                 // Title etc. are taken from input parameters
             }
             TextNodeKind::Chapter => {}
+            TextNodeKind::Lemma => {}
             TextNodeKind::Section => {
                 let name = self
                     .name
