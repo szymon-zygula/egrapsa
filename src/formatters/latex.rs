@@ -101,7 +101,7 @@ impl TextFormatter for Latex {
 \fancyhead[LE, RO]{\thepage}
 \fancyhead[CE]{\orgchapter}
 \fancyhead[CO]{\altchapter}
-
+\setlength{\headheight}{14.49998pt}
 ",
         );
 
