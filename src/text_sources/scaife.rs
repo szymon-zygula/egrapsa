@@ -206,7 +206,7 @@ fn read_empty_tag(tag: &BytesStart) -> Box<dyn TextNode> {
         "lb" => Box::new(LineNumber(get_attr_val(&tag, "n"))),
         "gap" => {
             let reason = get_attr_val(tag, "reason");
-            let rend = get_attr_val(tag, "rend");
+            let rend = get_attr_val_opt(tag, "rend");
             Box::new(Gap { reason, rend })
         }
         "milestone" => {

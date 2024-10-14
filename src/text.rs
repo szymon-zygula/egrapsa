@@ -47,7 +47,7 @@ pub enum TextNodeKind {
     Speaker,
     DialogueEntry,
     Regularized,
-    Date
+    Date,
 }
 
 #[derive(Debug)]
@@ -246,15 +246,23 @@ impl TextNode for Milestone {
 #[derive(Debug, Clone)]
 pub struct Gap {
     pub reason: String,
-    pub rend: String,
+    pub rend: Option<String>,
 }
 
 impl TextNode for Gap {
     fn to_string(&self) -> String {
-        format!("{} [{}]", self.rend, self.reason)
+        format!(
+            "{} [{}]",
+            self.rend.as_ref().map(|x| x.as_str()).unwrap_or("[...]"),
+            self.reason
+        )
     }
 
     fn format_for_latex(&self) -> String {
-        format!("{}\\footnote{{{}}}", self.rend, self.reason)
+        format!(
+            "{}\\footnote{{{}}}",
+            self.rend.as_ref().map(|x| x.as_str()).unwrap_or("[...]"),
+            self.reason
+        )
     }
 }
