@@ -50,7 +50,12 @@ pub enum TextNodeKind {
     Date,
     Apparatus,
     Lemma,
-    Highlight
+    Highlight,
+    Choice,
+    Abbreviated,
+    Expanded,
+    Expandable,
+    Description,
 }
 
 #[derive(Debug)]
@@ -164,6 +169,11 @@ impl TextNode for TextParent {
                 formatted.push_str("\n\\\\");
             }
             TextNodeKind::Simple => {}
+            TextNodeKind::Choice => {}
+            TextNodeKind::Abbreviated => formatted = String::new(), // Always use expanded version
+            TextNodeKind::Expanded => {}
+            TextNodeKind::Expandable => {}
+            TextNodeKind::Description => {}
         }
 
         formatted

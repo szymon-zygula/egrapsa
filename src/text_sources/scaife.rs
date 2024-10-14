@@ -131,7 +131,7 @@ fn read_text(reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>, start_tag: BytesStar
             Ok(Event::Start(tag)) => match name_to_str(&tag.name()) {
                 "p" | "div" | "del" | "foreign" | "label" | "q" | "title" | "quote" | "l"
                 | "cit" | "said" | "add" | "corr" | "num" | "sp" | "speaker" | "sic" | "reg"
-                | "date" | "app" | "lem" => {
+                | "date" | "app" | "lem" | "choice" | "abbr" | "ex" | "expan" | "desc" => {
                     let tag = tag.to_owned();
                     let text = read_text(reader, buf, tag);
                     subtexts.push(Box::new(text));
@@ -139,6 +139,12 @@ fn read_text(reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>, start_tag: BytesStar
                 "note" | "bibl" => {
                     let tag = tag.to_owned();
                     let text = read_text(reader, buf, tag);
+                    subtexts.push(Box::new(Footnote(text.to_string())));
+                }
+                "gap" => {
+                    let tag = tag.to_owned();
+                    let text = read_text(reader, buf, tag);
+                    subtexts.push(Box::new("[...]"));
                     subtexts.push(Box::new(Footnote(text.to_string())));
                 }
                 "hi" => {
@@ -249,17 +255,22 @@ fn get_text_kind(tag: &BytesStart) -> TextNodeKind {
         "app" => TextNodeKind::Apparatus,
         "lem" => TextNodeKind::Lemma,
         "reg" => TextNodeKind::Regularized,
+        "choice" => TextNodeKind::Choice,
+        "abbr" => TextNodeKind::Abbreviated,
+        "ex" => TextNodeKind::Expanded,
+        "expan" => TextNodeKind::Expandable,
         "sp" => TextNodeKind::DialogueEntry,
         "sic" => TextNodeKind::Sic,
         "speaker" => TextNodeKind::Speaker,
         "num" => TextNodeKind::Symbol,
         "corr" => TextNodeKind::Corrected,
+        "desc" => TextNodeKind::Description,
         "l" => TextNodeKind::Line,
         "label" => TextNodeKind::Label,
         "title" => TextNodeKind::Italics,
         "hi" => TextNodeKind::Highlight,
         "p" | "said" => TextNodeKind::Paragraph,
-        "note" | "bibl" => TextNodeKind::Note,
+        "gap" | "note" | "bibl" => TextNodeKind::Note,
         "del" => TextNodeKind::Deleted,
         "q" => TextNodeKind::Quote,
         "cit" => TextNodeKind::BlockQuote,
