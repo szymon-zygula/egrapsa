@@ -149,11 +149,12 @@ impl TextFormatter for Latex {
 \setcounter{secnumdepth}{0}
 
 \begin{document}
-            ",
+",
         );
 
         if self.config.title.is_some() {
             text.push_str("\\maketitle\n");
+            text.push_str(r"\clearpage\null\thispagestyle{empty}");
         }
 
         for (i, work) in self.works.iter().enumerate() {
@@ -176,18 +177,21 @@ impl TextFormatter for Latex {
             }
             text.push_str("{");
             text.push_str(&work.title);
-            text.push_str(".}\n");
+            text.push_str(".}\\thispagestyle{plain}\n");
             text.push_str(r"\renewcommand{\orgchapter}{");
             text.push_str(&work.title);
             text.push_str(".}\n");
             text.push_str(r"\renewcommand{\altchapter}{");
             text.push_str(work.alt_title.as_ref().unwrap_or(&work.title));
-            text.push_str(
-                r".}
-                \likechapter{\altchapter}
+            text.push_str(".} ");
+            if work.alt_title.is_some() {
+                text.push_str(
+                    r"
+\likechapter{\altchapter}
 
-                ",
-            );
+",
+                );
+            }
 
             text.push_str(&work.text.format_for_latex());
         }
