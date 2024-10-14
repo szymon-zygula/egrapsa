@@ -1,13 +1,10 @@
 BEFORE PRINTING:
-Line numbers and milestones and other numerations are displayed slightly too low.
-Line numbers and milestones and other numerations are too big?
-Latin font with ligatures.
-Something really bad happens in ΨΕΥΔΟΣΟΦΙΣΤΗΣ Η ΣΟΛΟΙΚΙΣΤΗΣ with margin notes
+Join margin notes if they are in the same spot 
 
 SECONDARY:
 Font selection.
-Replace chapters with parts
 Cache downloaded files
 Refactor TextNodeKind, formatting selection, generation in scaife etc. (so that it's not everywhere?).
-use long s option
-use old ligatures option
+Use long s option
+Use old ligatures option
+Refactor LaTeX formatting (string hell)

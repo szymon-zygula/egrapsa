@@ -65,7 +65,9 @@ impl TextFormatter for Latex {
 \usepackage{csquotes, dirtytalk, marginnote, lipsum, scrextend, xcolor, graphicx, amssymb, amstext, amsmath, epstopdf, booktabs, verbatim, gensymb, geometry, appendix, natbib, lmodern}
 \usepackage[pagestyles]{titlesec}
 \usepackage{fancyhdr}
+\usepackage{needspace}
 \usepackage{etoolbox}
+\usepackage{mparhack}
 \geometry{a5paper}
 
 \usepackage[utf8]{inputenc}",
@@ -78,10 +80,10 @@ impl TextFormatter for Latex {
 \usepackage{tocloft}
 
 \newcommand{\alignedmarginpar}[1]{%
-    \Ifthispageodd{%
-        \marginpar{\raggedright\small #1}
+    \needspace{1\baselineskip}\Ifthispageodd{%
+        \marginpar{\raggedright\vspace{0.5em}\scriptsize\color{gray} #1}
     }{%
-        \marginpar{\raggedleft\small #1}
+        \marginpar{\raggedleft\vspace{0.5em}\scriptsize\color{gray} #1}
     }%
 }
 
@@ -101,7 +103,8 @@ impl TextFormatter for Latex {
 \fancyhead[LE, RO]{\thepage}
 \fancyhead[CE]{\orgchapter}
 \fancyhead[CO]{\altchapter}
-\setlength{\headheight}{14.49998pt}
+\setlength{\headheight}{14.5pt}
+\setlength{\parindent}{0pt}
 ",
         );
 

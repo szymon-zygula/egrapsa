@@ -93,7 +93,7 @@ impl TextNode for TextParent {
             TextNodeKind::Apparatus => {}
             TextNodeKind::Date => {}
             TextNodeKind::Speaker => {
-                let mut text = String::from(r"\textbf{");
+                let mut text = String::from(r"\vspace{6pt}\textbf{");
                 text.push_str(&formatted);
                 text.push_str("}· ");
                 formatted = text;
@@ -199,10 +199,9 @@ impl TextNode for ParagraphNumber {
     }
 
     fn format_for_latex(&self) -> String {
-        let mut text = String::from("\n");
-        text.push_str(r"\alignedmarginpar{\footnotesize\color{gray} p.");
+        let mut text = String::from(r"\alignedmarginpar{");
         text.push_str(&self.0);
-        text.push_str("}\n");
+        text.push_str("}");
         text
     }
 }
@@ -216,7 +215,7 @@ impl TextNode for LineNumber {
     }
 
     fn format_for_latex(&self) -> String {
-        let mut text = String::from(r"\alignedmarginpar{\footnotesize\color{gray}");
+        let mut text = String::from(r"\alignedmarginpar{");
         text.push_str(&self.0);
         text.push_str("}");
         text
@@ -246,7 +245,7 @@ impl TextNode for Milestone {
         }
 
         if let Some(number) = &self.number {
-            let mut text = String::from(r"\alignedmarginpar{\footnotesize\color{gray}");
+            let mut text = String::from(r"\alignedmarginpar{");
             text.push_str(number);
             text.push_str("}");
             text
