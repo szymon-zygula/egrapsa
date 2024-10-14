@@ -45,7 +45,8 @@ pub enum TextNodeKind {
     Corrected,
     Symbol,
     Speaker,
-    DialogueEntry
+    DialogueEntry,
+    Regularized,
 }
 
 #[derive(Debug)]
@@ -79,14 +80,14 @@ impl TextNode for TextParent {
                 // This seems nonsensical. We'll ignore <sic> for now.
                 formatted = String::new()
             }
+            TextNodeKind::Regularized => {}
             TextNodeKind::Speaker => {
                 let mut text = String::from(r"\textbf{");
                 text.push_str(&formatted);
                 text.push_str("}· ");
                 formatted = text;
             }
-            TextNodeKind::DialogueEntry => {
-            }
+            TextNodeKind::DialogueEntry => {}
             TextNodeKind::Symbol => {
                 let mut text = String::from(r"\textit{");
                 text.push_str(&formatted);
