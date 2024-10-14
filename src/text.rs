@@ -278,6 +278,16 @@ impl TextNode for Highlight {
     }
 }
 
+// "lost" does not look good when all other footnotes are in Latin.
+// On the other hand, when footnotes are in English, "lacuna" is still acceptable,
+// although somewhat over-the-top (so perfect for this project)
+fn translate_gap_reason(reason: &str) -> &str {
+    match reason {
+        "lost" => "lacuna",
+        x => x,
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct Gap {
     pub reason: String,
@@ -289,7 +299,7 @@ impl TextNode for Gap {
         format!(
             "{} [{}]",
             self.rend.as_ref().map(|x| x.as_str()).unwrap_or("[...]"),
-            self.reason
+            translate_gap_reason(&self.reason)
         )
     }
 
@@ -297,7 +307,7 @@ impl TextNode for Gap {
         format!(
             "{}\\footnote{{{}}} ",
             self.rend.as_ref().map(|x| x.as_str()).unwrap_or("[...]"),
-            self.reason
+            translate_gap_reason(&self.reason)
         )
     }
 }
