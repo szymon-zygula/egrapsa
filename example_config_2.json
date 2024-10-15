@@ -4,7 +4,8 @@
     "formatter_config": {
         "title": "Opera Omnia",
         "author": "Marcus Tulius Cicero",
-        "catchwords": true,
+        "catchwords": false,
+        "margin_notes": true,
         "language": "Latin"
     },
     "source_type": "Scaife",
