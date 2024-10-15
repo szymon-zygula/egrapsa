@@ -95,9 +95,9 @@ impl TextNode for TextParent {
             TextNodeKind::Apparatus => {}
             TextNodeKind::Date => {}
             TextNodeKind::Speaker => {
-                let mut text = String::from(r"\vspace{6pt}\textbf{");
+                let mut text = String::from(r"\vspace{6pt}\Needspace{2\baselineskip}\textbf{");
                 text.push_str(&formatted);
-                text.push_str("}· ");
+                text.push_str(r"}·\\");
                 formatted = text;
             }
             TextNodeKind::DialogueEntry => {}
