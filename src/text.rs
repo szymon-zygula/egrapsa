@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 pub trait TextNode: std::fmt::Debug {
     fn to_string(&self) -> String;
 
@@ -177,6 +179,14 @@ impl TextNode for TextParent {
     }
 }
 
+fn ensure_dot(str: &str) -> Cow<str> {
+    if str.ends_with('.') || str.ends_with(". ") {
+        Cow::Borrowed(str)
+    } else {
+        Cow::Owned(String::from(str) + ".")
+    }
+}
+
 #[derive(Debug)]
 pub struct Footnote(pub String);
 
@@ -186,7 +196,7 @@ impl TextNode for Footnote {
     }
 
     fn format_for_latex(&self) -> String {
-        format!("\\footnote{{{}}} ", self.0.format_for_latex())
+        format!("\\footnote{{{}}} ", ensure_dot(&self.0.format_for_latex()))
     }
 }
 
@@ -306,7 +316,7 @@ impl TextNode for Gap {
         format!(
             "{}\\footnote{{{}}} ",
             self.rend.as_ref().map(|x| x.as_str()).unwrap_or("[\\dots]"),
-            translate_gap_reason(&self.reason)
+            ensure_dot(translate_gap_reason(&self.reason))
         )
     }
 }
