@@ -73,14 +73,17 @@ impl TextFormatter for Latex {
 \usepackage[utf8]{inputenc}",
         );
         text.push_str(self.get_language_packages());
+        if self.config.catchwords {
+            text.push_str("\\usepackage{fwlw}");
+        }
+
         text.push_str(
             r"
 \usepackage{fontspec}
-\usepackage{fwlw}
 \usepackage{tocloft}
 
 \newcommand{\alignedmarginpar}[1]{%
-    \needspace{1\baselineskip}\Ifthispageodd{%
+    \Ifthispageodd{%
         \marginpar{\raggedright\vspace{0.5em}\scriptsize\color{gray} #1}
     }{%
         \marginpar{\raggedleft\vspace{0.5em}\scriptsize\color{gray} #1}
@@ -104,7 +107,7 @@ impl TextFormatter for Latex {
 \fancyhead[CE]{\orgchapter}
 \fancyhead[CO]{\altchapter}
 \setlength{\headheight}{14.5pt}
-\setlength{\parindent}{0pt}
+\setlength{\marginparpush}{-6pt}
 ",
         );
 
