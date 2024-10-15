@@ -49,6 +49,10 @@ impl TextFormatter for Latex {
         self.config.catchwords = catchwords;
     }
 
+    fn set_margin_notes(&mut self, margin_notes: bool) {
+        self.config.margin_notes = margin_notes;
+    }
+
     fn add_work(&mut self, work: Work) {
         self.works.push(work);
     }
@@ -82,12 +86,22 @@ impl TextFormatter for Latex {
 \usepackage{fontspec}
 \usepackage{tocloft}
 
-\newcommand{\alignedmarginpar}[1]{%
+\newcommand{\alignedmarginpar}[1]{%",
+        );
+
+        if self.config.margin_notes {
+            text.push_str(
+                r"
     \Ifthispageodd{%
         \marginpar{\raggedright\vspace{0.5em}\scriptsize\color{gray} #1}
     }{%
         \marginpar{\raggedleft\vspace{0.5em}\scriptsize\color{gray} #1}
-    }%
+    }%",
+            );
+        }
+
+        text.push_str(
+            r"
 }
 
 \date{}

@@ -35,6 +35,7 @@ pub struct FormatterConfig {
     pub title: Option<String>,
     pub author: Option<String>,
     pub catchwords: bool,
+    pub margin_notes: bool,
     pub language: Language,
 }
 
@@ -86,6 +87,7 @@ impl Config {
         formatter.set_title(config.title);
         formatter.set_author(config.author);
         formatter.set_catchwords(config.catchwords);
+        formatter.set_margin_notes(config.margin_notes);
         formatter.set_language(config.language);
 
         formatter
