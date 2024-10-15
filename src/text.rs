@@ -297,7 +297,7 @@ impl TextNode for Gap {
     fn to_string(&self) -> String {
         format!(
             "{} [{}]",
-            self.rend.as_ref().map(|x| x.as_str()).unwrap_or("[...]"),
+            self.rend.as_ref().map(|x| x.as_str()).unwrap_or("[\\dots]"),
             translate_gap_reason(&self.reason)
         )
     }
@@ -305,7 +305,7 @@ impl TextNode for Gap {
     fn format_for_latex(&self) -> String {
         format!(
             "{}\\footnote{{{}}} ",
-            self.rend.as_ref().map(|x| x.as_str()).unwrap_or("[...]"),
+            self.rend.as_ref().map(|x| x.as_str()).unwrap_or("[\\dots]"),
             translate_gap_reason(&self.reason)
         )
     }
