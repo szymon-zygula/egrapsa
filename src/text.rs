@@ -174,9 +174,6 @@ impl TextNode for TextParent {
             TextNodeKind::Description => {}
         }
 
-        // TODO: get rid of this, it is not helping (e.g "'<reg>petisse</reg>,'" in Pro Q. Roscio
-        // Comoedo)
-        formatted = format!(" {} ", formatted);
         formatted = replace_et_ampersand(formatted);
         fix_text(formatted)
     }
@@ -407,3 +404,5 @@ fn normalize_text(mut text: String) -> String {
     text = text.replace('#', r"\#");
     text
 }
+
+

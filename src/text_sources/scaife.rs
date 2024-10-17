@@ -43,7 +43,9 @@ impl TextSource for Scaife {
         expect_opening_tag(reader, buf, "body");
 
         let starting_div = read_starting_div(reader, buf).to_owned();
-        let section = read_text(reader, buf, starting_div);
+        reader.trim_text(false);
+        let text = read_text(reader, buf, starting_div);
+        reader.trim_text(true);
 
         expect_closing_tag(reader, buf, "body");
         expect_closing_tag(reader, buf, "text");
@@ -54,9 +56,7 @@ impl TextSource for Scaife {
 
         expect_eof(reader, buf);
 
-        // println!("{:#?}", section.remove_new_lines());
-
-        Ok(section)
+        Ok(text)
     }
 }
 
