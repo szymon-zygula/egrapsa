@@ -225,6 +225,9 @@ impl TextFormatter for Latex {
 
         text.push_str(
             r"
+\center
+\vspace{2cm}
+\textbf{FINIS.}
 \clearpage\null\thispagestyle{empty}
 \Ifthispageodd{%
     \clearpage\null\thispagestyle{empty}
@@ -234,8 +237,10 @@ impl TextFormatter for Latex {
 }%
 \renewcommand{\contentsname}{Index}
 \renewcommand{\cftchapleader}{\cftdotfill{\cftdotsep}}
-\center
-\tableofcontents",
+\tableofcontents
+\vspace{1cm}
+\textbf{FINIS TABULÆ.}
+",
         );
         text.push_str(r"\end{document}");
 
