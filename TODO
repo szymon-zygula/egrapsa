@@ -1,5 +1,4 @@
 BEFORE PRINTING:
-Replace "et" and "etc" with "&" nad "&c"
 Add FINIS on the last page
 Add Finis tabulae (make sure that's the spelling) after index
 
@@ -9,4 +8,5 @@ Cache downloaded files
 Refactor TextNodeKind, formatting selection, generation in scaife etc. (so that it's not everywhere?).
 Use long s option
 Use old ligatures option
+Hide footnotes option
 Refactor LaTeX formatting (string hell)

@@ -175,6 +175,7 @@ impl TextNode for TextParent {
         }
 
         formatted = format!(" {} ", formatted);
+        formatted = replace_et_ampersand(formatted);
         fix_text(&formatted)
     }
 }
@@ -297,6 +298,29 @@ fn translate_gap_reason(reason: &str) -> &str {
     }
 }
 
+const WORD_ENDS: [&str; 7] = [" ", ".", ",", "!", "?", ";", ":"];
+
+fn replace_word(text: String, word: &str, replacement: &str, terminator: &str) -> String {
+    text.replace(
+        &format!(" {word}{terminator}"),
+        &format!(" {replacement}{terminator}"),
+    )
+}
+
+fn replace_words(mut text: String, word: &str, replacement: &str) -> String {
+    for terminator in WORD_ENDS {
+        text = replace_word(text, word, replacement, terminator);
+    }
+
+    text
+}
+
+fn replace_et_ampersand(mut text: String) -> String {
+    text = replace_words(text, "et", "\\&");
+    text = replace_words(text, "etc", "\\&c");
+    text
+}
+
 #[derive(Debug, Clone)]
 pub struct Gap {
     pub reason: String,
@@ -342,6 +366,7 @@ pub fn fix_text(text: &str) -> String {
     fix_punctuation(&mut text, ",");
     fix_punctuation(&mut text, ".");
     fix_punctuation(&mut text, "?");
+    fix_punctuation(&mut text, "!");
     fix_punctuation(&mut text, ";");
     fix_punctuation(&mut text, ";"); // Greek question mark
     fix_punctuation(&mut text, ":");
