@@ -13,7 +13,7 @@ impl TextNode for String {
     }
 
     fn format_for_latex(&self) -> String {
-        self.clone().replace('#', r"\#")
+        normalize_text(self.clone())
     }
 }
 
@@ -174,9 +174,11 @@ impl TextNode for TextParent {
             TextNodeKind::Description => {}
         }
 
+        // TODO: get rid of this, it is not helping (e.g "'<reg>petisse</reg>,'" in Pro Q. Roscio
+        // Comoedo)
         formatted = format!(" {} ", formatted);
         formatted = replace_et_ampersand(formatted);
-        fix_text(&formatted)
+        fix_text(formatted)
     }
 }
 
@@ -211,7 +213,7 @@ impl TextNode for ParagraphNumber {
 
     fn format_for_latex(&self) -> String {
         let mut text = String::from(r"\alignedmarginpar{");
-        text.push_str(&self.0);
+        text.push_str(&self.0.format_for_latex());
         text.push_str("}");
         text
     }
@@ -227,7 +229,7 @@ impl TextNode for LineNumber {
 
     fn format_for_latex(&self) -> String {
         let mut text = String::from(r"\alignedmarginpar{");
-        text.push_str(&self.0);
+        text.push_str(&self.0.format_for_latex());
         text.push_str("}");
         text
     }
@@ -257,7 +259,7 @@ impl TextNode for Milestone {
 
         if let Some(number) = &self.number {
             let mut text = String::from(r"\alignedmarginpar{");
-            text.push_str(number);
+            text.push_str(&number.format_for_latex());
             text.push_str("}");
             text
         } else {
@@ -298,6 +300,72 @@ fn translate_gap_reason(reason: &str) -> &str {
     }
 }
 
+#[derive(Debug, Clone)]
+pub struct Gap {
+    pub reason: String,
+    pub rend: Option<String>,
+}
+
+impl TextNode for Gap {
+    fn to_string(&self) -> String {
+        format!(
+            "{} [{}]",
+            self.rend.as_ref().map(|x| x.as_str()).unwrap_or("[\\dots]"),
+            translate_gap_reason(&self.reason)
+        )
+    }
+
+    fn format_for_latex(&self) -> String {
+        format!(
+            "{}\\footnote{{{}}} ",
+            self.rend.as_ref().map(|x| x.as_str()).unwrap_or("[\\dots]"),
+            ensure_dot(translate_gap_reason(&self.reason.format_for_latex()))
+        )
+    }
+}
+
+fn fix_punctuation(text: String, p: &str) -> String {
+    // A quick way to normalize spaces. Much faster than regexes.
+    text
+        // To avoid using `format!`
+        .replace(p, "\x00")
+        // Block replacing before quotation marks
+        .replace("\x00'", "\x01'")
+        .replace("\x00\"", "\x01\"")
+        // Normalize spaces everywhere
+        .replace("\x00", "\x00 ") // Double spaces are fixed later in `fix_text`
+        .replace(" \x00", "\x00")
+        // Restore before quotation marks
+        .replace("\x01", "\x00")
+        // Normalize spaces next to quotation marks
+        .replace(" \x00'", "\x00'")
+        .replace(" \x00\"", "\x00\"")
+        // Restore `p`
+        .replace("\x00", p)
+}
+
+pub fn fix_text(mut text: String) -> String {
+    text = fix_punctuation(text, ",");
+    text = fix_punctuation(text, ".");
+    text = fix_punctuation(text, "?");
+    text = fix_punctuation(text, "!");
+    text = fix_punctuation(text, ";");
+    text = fix_punctuation(text, ";"); // Greek question mark
+    text = fix_punctuation(text, ":");
+    text = fix_punctuation(text, "·");
+
+    text.replace("&gt;", "")
+        .replace("&lt;", "") // Remove junk
+        .replace(" — ", "---")
+        .replace("— ", "---")
+        .replace(" —", "---")
+        .replace(" ---", "---")
+        .replace("--- ", "---")
+        // Fix multiple spaces
+        .replace("  ", " ")
+        .replace("   ", " ")
+}
+
 const WORD_ENDS: [&str; 7] = [" ", ".", ",", "!", "?", ";", ":"];
 
 fn replace_word(text: String, word: &str, replacement: &str, terminator: &str) -> String {
@@ -321,56 +389,21 @@ fn replace_et_ampersand(mut text: String) -> String {
     text
 }
 
-#[derive(Debug, Clone)]
-pub struct Gap {
-    pub reason: String,
-    pub rend: Option<String>,
+fn replace_ae_oe(mut text: String) -> String {
+    text = text.replace("ae", "æ");
+    text = text.replace("Ae", "Æ");
+    text = text.replace("AE", "Æ");
+
+    text = text.replace("oe", "œ");
+    text = text.replace("Oe", "œ");
+    text = text.replace("OE", "Œ");
+
+    text
 }
 
-impl TextNode for Gap {
-    fn to_string(&self) -> String {
-        format!(
-            "{} [{}]",
-            self.rend.as_ref().map(|x| x.as_str()).unwrap_or("[\\dots]"),
-            translate_gap_reason(&self.reason)
-        )
-    }
-
-    fn format_for_latex(&self) -> String {
-        format!(
-            "{}\\footnote{{{}}} ",
-            self.rend.as_ref().map(|x| x.as_str()).unwrap_or("[\\dots]"),
-            ensure_dot(translate_gap_reason(&self.reason))
-        )
-    }
-}
-
-fn fix_punctuation(text: &mut String, p: &str) {
-    // A quick way to normalize spaces
-    *text = text
-        .replace(p, &format!("{} ", p))
-        .replace(&format!(" {}", p), p)
-        .replace(&format!("{}   ", p), &format!("{} ", p))
-        .replace(&format!("{}  ", p), &format!("{} ", p));
-}
-
-pub fn fix_text(text: &str) -> String {
-    let mut text = text
-        .replace("&gt;", "")
-        .replace("&lt;", "") // Remove junk
-        .replace(" — ", "—")
-        .replace("— ", "—")
-        .replace(" —", "—")
-        .replace("—", "---");
-
-    fix_punctuation(&mut text, ",");
-    fix_punctuation(&mut text, ".");
-    fix_punctuation(&mut text, "?");
-    fix_punctuation(&mut text, "!");
-    fix_punctuation(&mut text, ";");
-    fix_punctuation(&mut text, ";"); // Greek question mark
-    fix_punctuation(&mut text, ":");
-    fix_punctuation(&mut text, "·");
-
+fn normalize_text(mut text: String) -> String {
+    text = replace_et_ampersand(text);
+    text = replace_ae_oe(text);
+    text = text.replace('#', r"\#");
     text
 }

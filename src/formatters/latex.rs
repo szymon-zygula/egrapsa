@@ -38,11 +38,11 @@ impl Latex {
 
 impl TextFormatter for Latex {
     fn set_title(&mut self, title: Option<String>) {
-        self.config.title = title;
+        self.config.title = title.map(|x| x.format_for_latex());
     }
 
     fn set_author(&mut self, author: Option<String>) {
-        self.config.author = author;
+        self.config.author = author.map(|x| x.format_for_latex());
     }
 
     fn set_catchwords(&mut self, catchwords: bool) {
@@ -54,6 +54,12 @@ impl TextFormatter for Latex {
     }
 
     fn add_work(&mut self, work: Work) {
+        let work = Work {
+            title: work.title.format_for_latex(),
+            alt_title: work.alt_title.map(|x| x.format_for_latex()),
+            ..work
+        };
+
         self.works.push(work);
     }
 

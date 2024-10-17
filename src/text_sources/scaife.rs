@@ -96,6 +96,11 @@ fn read_starting_div<'a>(reader: &mut Reader<&[u8]>, buf: &'a mut Vec<u8>) -> By
     }
 }
 
+fn remove_unnecessary_whitespace(text: String) -> String {
+    // New lines there don't mean anything for the text, same with tabulation
+    text.replace('\n', " ").replace('\t', "")
+}
+
 fn read_text(reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>, start_tag: BytesStart) -> TextParent {
     let mut subtexts = Vec::<Box<dyn TextNode>>::new();
     let mut name: Option<Box<dyn TextNode>> = None;
@@ -142,9 +147,13 @@ fn read_text(reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>, start_tag: BytesStar
                 ensure_tag_end(&tag, &start_tag);
                 break;
             }
-            Ok(Event::Text(content)) => subtexts.push(Box::new(fix_text(
-                std::str::from_utf8(&content.into_inner()).unwrap(),
-            ))),
+            Ok(Event::Text(content)) => {
+                subtexts.push(Box::new(fix_text(remove_unnecessary_whitespace(
+                    std::str::from_utf8(&content.into_inner())
+                        .unwrap()
+                        .to_string(),
+                ))))
+            }
             Ok(Event::Empty(tag)) => subtexts.push(read_empty_tag(&tag)),
             Err(e) => panic!("Expected text, got error: {e}"),
             ev => panic!("Missing text, got event: {ev:?}"),
