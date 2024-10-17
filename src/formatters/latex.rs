@@ -101,12 +101,16 @@ impl TextFormatter for Latex {
 \usepackage{fontspec}
 \usepackage{tocloft}
 
-\usepackage{enumitem} 
+% Show paragraphs in ToC (actually not used for paragraphs but for chapters)
+\setcounter{tocdepth}{4}
+\setcounter{secnumdepth}{4}
+
+\usepackage{enumitem}
 \makeatletter
 \newcommand{\greekalpha}[1]{\c@greekalpha{#1}}
 \newcommand{\c@greekalpha}[1]{%
   {%
-    \ifcase\number\value{#1} %
+    \ifcase\number\value{#1}%
     \or
     α´
     \or
@@ -254,28 +258,41 @@ impl TextFormatter for Latex {
     \clearpage\null
     \clearpage\null\thispagestyle{empty}
 }%
-                          ",
+",
                 );
             }
 
-            text.push_str(r"\chapter");
+            text.push_str(&format!(r"\chapter*{{{}.}}", work.title));
             if let Some(alt_title) = &work.alt_title {
-                text.push_str(&format!("[{} ({})]", work.title, alt_title));
+                text.push_str(&format!(
+                    r"
+\addtocontents{{toc}}{{\protect\vskip-10pt}}
+\addtocontents{{toc}}{{\protect\contentsline{{chapter}}{{{}}}{{}}{{}}}}
+\addcontentsline{{toc}}{{paragraph}}{{\textbf{{({})}}}}
+",
+                    work.title, alt_title,
+                ));
+            } else {
+                text.push_str(&format!(
+                    r"
+\addcontentsline{{toc}}{{paragraph}}{{\textbf{{{}}}}}",
+                    work.title,
+                ));
             }
-            text.push_str("{");
-            text.push_str(&work.title);
-            text.push_str(".}\\thispagestyle{plain}\n");
-            text.push_str(r"\renewcommand{\orgchapter}{");
-            text.push_str(&work.title);
-            text.push_str(".}\n");
-            text.push_str(r"\renewcommand{\altchapter}{");
-            text.push_str(work.alt_title.as_ref().unwrap_or(&work.title));
-            text.push_str(".} ");
+
+            text.push_str("\\thispagestyle{plain}\n");
+            text.push_str(&format!(
+                "\\renewcommand{{\\orgchapter}}{{{}.}}\n",
+                work.title
+            ));
+            text.push_str(&format!(
+                "\\renewcommand{{\\altchapter}}{{{}.}}\n",
+                work.alt_title.as_ref().unwrap_or(&work.title)
+            ));
             if work.alt_title.is_some() {
                 text.push_str(
                     r"
 \likechapter{\altchapter}
-
 ",
                 );
             }
@@ -296,7 +313,7 @@ impl TextFormatter for Latex {
     \clearpage\null\thispagestyle{empty}
 }%
 \renewcommand{\contentsname}{Index}
-\renewcommand{\cftchapleader}{\cftdotfill{\cftdotsep}}
+\setlength{\cftparaindent}{0pt}
 \tableofcontents
 \vspace{1cm}
 \textbf{FINIS TABULÆ.}
