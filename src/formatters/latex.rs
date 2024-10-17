@@ -1,6 +1,7 @@
 use super::{Language, TextFormatter, Work};
 use crate::config::FormatterConfig;
 use crate::text::*;
+use regex::Regex;
 
 pub struct Latex {
     config: FormatterConfig,
@@ -31,8 +32,12 @@ impl Latex {
     }
 
     // Replace some characters not likely to be found in fonts
-    fn normalize(text: String) -> String {
-        text.replace("ↄ", r"\rotatebox[origin=c]{180}{c}") // Roman numeral ↄ
+    fn normalize(mut text: String) -> String {
+        text = text.replace("ↄ", r"\rotatebox[origin=c]{180}{c}"); // Roman numeral ↄ
+        let marginpar_regex = Regex::new(r" \\alignedmarginpar\{(.*)\} ").unwrap();
+        marginpar_regex
+            .replace_all(&text, "\\alignedmarginpar{$1}")
+            .to_string()
     }
 }
 
@@ -51,6 +56,10 @@ impl TextFormatter for Latex {
 
     fn set_margin_notes(&mut self, margin_notes: bool) {
         self.config.margin_notes = margin_notes;
+    }
+
+    fn set_footnotes(&mut self, footnotes: bool) {
+        self.config.footnotes = footnotes;
     }
 
     fn add_work(&mut self, work: Work) {
@@ -98,10 +107,10 @@ impl TextFormatter for Latex {
         if self.config.margin_notes {
             text.push_str(
                 r"
-    \Ifthispageodd{%
-        \marginpar{\raggedright\vspace{0.5em}\scriptsize\color{gray} #1}
+    \hspace{0pt}\Ifthispageodd{%
+        \marginpar{\raggedright\vspace{-0.5em}\scriptsize\color{gray} #1}
     }{%
-        \marginpar{\raggedleft\vspace{0.5em}\scriptsize\color{gray} #1}
+        \marginpar{\raggedleft\vspace{-0.5em}\scriptsize\color{gray} #1}
     }%",
             );
         }
@@ -227,13 +236,11 @@ impl TextFormatter for Latex {
             text.push_str(&work.text.format_for_latex(&self.config));
         }
 
-        text.push_str(r"\renewcommand{\altchapter}{}");
-
         text.push_str(
             r"
 \center
-\vspace{2cm}
 \textbf{FINIS.}
+\renewcommand{\altchapter}{}
 \clearpage\null\thispagestyle{empty}
 \Ifthispageodd{%
     \clearpage\null\thispagestyle{empty}

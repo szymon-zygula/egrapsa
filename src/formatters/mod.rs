@@ -25,6 +25,7 @@ pub trait TextFormatter {
     fn set_author(&mut self, author: Option<String>);
     fn set_catchwords(&mut self, catchwords: bool);
     fn set_margin_notes(&mut self, margin_notes: bool);
+    fn set_footnotes(&mut self, footnotes: bool);
     fn set_language(&mut self, language: Language);
     fn add_work(&mut self, work: Work);
     fn format(&self) -> String;

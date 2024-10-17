@@ -89,6 +89,7 @@ impl Config {
         formatter.set_author(config.author);
         formatter.set_catchwords(config.catchwords);
         formatter.set_margin_notes(config.margin_notes);
+        formatter.set_footnotes(config.footnotes);
         formatter.set_language(config.language);
 
         formatter

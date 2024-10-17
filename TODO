@@ -6,5 +6,4 @@ Cache downloaded files
 Refactor TextNodeKind, formatting selection, generation in scaife etc. (so that it's not everywhere?).
 Use long s option
 Use old ligatures option
-Hide footnotes option
 Refactor LaTeX formatting (string hell)

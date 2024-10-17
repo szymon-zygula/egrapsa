@@ -197,10 +197,14 @@ impl TextNode for Footnote {
     }
 
     fn format_for_latex(&self, config: &FormatterConfig) -> String {
-        format!(
-            "\\footnote{{{}}} ",
-            ensure_dot(&self.0.format_for_latex(config))
-        )
+        if config.footnotes {
+            format!(
+                "\\footnote{{{}}} ",
+                ensure_dot(&self.0.format_for_latex(config))
+            )
+        } else {
+            String::new()
+        }
     }
 }
 
@@ -408,4 +412,3 @@ fn normalize_text(mut text: String) -> String {
     text = text.replace('#', r"\#");
     text
 }
-
