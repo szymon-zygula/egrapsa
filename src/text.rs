@@ -118,12 +118,14 @@ impl TextNode for TextParent {
                     .name
                     .as_ref()
                     .map(|s| s.format_for_latex(config))
-                    .unwrap_or_default();
-                let mut text = String::from(r"\section*{");
-                text.push_str(&name);
-                text.push('}');
-                text.push_str(&formatted);
-                formatted = text;
+                    .unwrap_or(
+                        match config.language {
+                            crate::formatters::Language::Latin => r"Liber \Roman{section}",
+                            crate::formatters::Language::Greek => r"Βιβλίος \greekalpha{section}",
+                        }
+                        .to_string(),
+                    );
+                formatted = format!(r"\section[{name}]{{{name}.}}{formatted}");
             }
             TextNodeKind::SubSection => {
                 let name = self

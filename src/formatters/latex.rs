@@ -101,6 +101,44 @@ impl TextFormatter for Latex {
 \usepackage{fontspec}
 \usepackage{tocloft}
 
+\usepackage{enumitem} 
+\makeatletter
+\newcommand{\greekalpha}[1]{\c@greekalpha{#1}}
+\newcommand{\c@greekalpha}[1]{%
+  {%
+    \ifcase\number\value{#1} %
+    \or
+    α´
+    \or
+    β´
+    \or
+    γ´
+    \or
+    δ´
+    \or
+    ε´
+    \or
+    ϛ´
+    \or
+    ζ´
+    \or
+    η´
+    \or
+    θ´
+    \or
+    ι´
+    \or
+    ια´
+    \fi
+  }%
+}
+
+\AddEnumerateCounter*{\greekalpha}{\c@greekalpha}{5}
+\makeatother
+
+\usepackage{sectsty}
+\allsectionsfont{\centering}
+
 \newcommand{\alignedmarginpar}[1]{%",
         );
 
@@ -120,6 +158,16 @@ impl TextFormatter for Latex {
 }
 
 \date{}
+
+\makeatletter
+\renewcommand{\@seccntformat}[1]{%
+  \ifcsname prefix@#1\endcsname
+    \csname prefix@#1\endcsname
+  \else
+    \csname the#1\endcsname\quad
+  \fi}
+\newcommand\prefix@section{}
+\makeatother
 
 \titlespacing*{\chapter}{0pt}{0pt}{15pt}
 
@@ -186,7 +234,6 @@ impl TextFormatter for Latex {
 
         text.push_str(
             r"
-\setcounter{secnumdepth}{0}
 
 \begin{document}
 ",
