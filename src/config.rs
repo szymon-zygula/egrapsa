@@ -36,6 +36,7 @@ pub struct FormatterConfig {
     pub author: Option<String>,
     pub catchwords: bool,
     pub margin_notes: bool,
+    pub footnotes: bool,
     pub language: Language,
 }
 

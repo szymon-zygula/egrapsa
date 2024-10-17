@@ -1,10 +1,11 @@
+use crate::config::FormatterConfig;
 use std::borrow::Cow;
 
 pub trait TextNode: std::fmt::Debug {
     fn to_string(&self) -> String;
 
     // Visitor functions for formatters
-    fn format_for_latex(&self) -> String;
+    fn format_for_latex(&self, config: &FormatterConfig) -> String;
 }
 
 impl TextNode for String {
@@ -12,7 +13,7 @@ impl TextNode for String {
         self.clone()
     }
 
-    fn format_for_latex(&self) -> String {
+    fn format_for_latex(&self, _config: &FormatterConfig) -> String {
         normalize_text(self.clone())
     }
 }
@@ -22,8 +23,8 @@ impl TextNode for &str {
         String::from(*self)
     }
 
-    fn format_for_latex(&self) -> String {
-        TextNode::to_string(self).format_for_latex()
+    fn format_for_latex(&self, config: &FormatterConfig) -> String {
+        TextNode::to_string(self).format_for_latex(config)
     }
 }
 
@@ -75,11 +76,11 @@ impl TextNode for TextParent {
             .fold(String::new(), |a, b| [&a, " ", &b].concat())
     }
 
-    fn format_for_latex(&self) -> String {
+    fn format_for_latex(&self, config: &FormatterConfig) -> String {
         let mut formatted: String = self
             .subtexts
             .iter()
-            .map(|subtext| subtext.format_for_latex())
+            .map(|subtext| subtext.format_for_latex(config))
             .filter(|subtext| !subtext.is_empty())
             .collect();
 
@@ -116,7 +117,7 @@ impl TextNode for TextParent {
                 let name = self
                     .name
                     .as_ref()
-                    .map(|s| s.format_for_latex())
+                    .map(|s| s.format_for_latex(config))
                     .unwrap_or_default();
                 let mut text = String::from(r"\section*{");
                 text.push_str(&name);
@@ -128,7 +129,7 @@ impl TextNode for TextParent {
                 let name = self
                     .name
                     .as_ref()
-                    .map(|s| s.format_for_latex())
+                    .map(|s| s.format_for_latex(config))
                     .unwrap_or_default();
                 let mut text = String::from(r"\subsection*{");
                 text.push_str(&name);
@@ -195,8 +196,11 @@ impl TextNode for Footnote {
         self.0.clone()
     }
 
-    fn format_for_latex(&self) -> String {
-        format!("\\footnote{{{}}} ", ensure_dot(&self.0.format_for_latex()))
+    fn format_for_latex(&self, config: &FormatterConfig) -> String {
+        format!(
+            "\\footnote{{{}}} ",
+            ensure_dot(&self.0.format_for_latex(config))
+        )
     }
 }
 
@@ -208,9 +212,9 @@ impl TextNode for ParagraphNumber {
         self.0.clone()
     }
 
-    fn format_for_latex(&self) -> String {
+    fn format_for_latex(&self, config: &FormatterConfig) -> String {
         let mut text = String::from(r"\alignedmarginpar{");
-        text.push_str(&self.0.format_for_latex());
+        text.push_str(&self.0.format_for_latex(config));
         text.push_str("}");
         text
     }
@@ -224,9 +228,9 @@ impl TextNode for LineNumber {
         self.0.clone()
     }
 
-    fn format_for_latex(&self) -> String {
+    fn format_for_latex(&self, config: &FormatterConfig) -> String {
         let mut text = String::from(r"\alignedmarginpar{");
-        text.push_str(&self.0.format_for_latex());
+        text.push_str(&self.0.format_for_latex(config));
         text.push_str("}");
         text
     }
@@ -249,14 +253,14 @@ impl TextNode for Milestone {
         }
     }
 
-    fn format_for_latex(&self) -> String {
+    fn format_for_latex(&self, config: &FormatterConfig) -> String {
         if self.unit == "page" || self.unit == "speech" {
             return String::new();
         }
 
         if let Some(number) = &self.number {
             let mut text = String::from(r"\alignedmarginpar{");
-            text.push_str(&number.format_for_latex());
+            text.push_str(&number.format_for_latex(config));
             text.push_str("}");
             text
         } else {
@@ -276,8 +280,8 @@ impl TextNode for Highlight {
         self.text.to_string()
     }
 
-    fn format_for_latex(&self) -> String {
-        let inner = self.text.format_for_latex();
+    fn format_for_latex(&self, config: &FormatterConfig) -> String {
+        let inner = self.text.format_for_latex(config);
         let mark = match self.rend.as_str() {
             "italics" => "textit",
             _ => panic!("Unknown <hi> rend type ({})", self.rend),
@@ -312,11 +316,11 @@ impl TextNode for Gap {
         )
     }
 
-    fn format_for_latex(&self) -> String {
+    fn format_for_latex(&self, config: &FormatterConfig) -> String {
         format!(
             "{}\\footnote{{{}}} ",
             self.rend.as_ref().map(|x| x.as_str()).unwrap_or("[\\dots]"),
-            ensure_dot(translate_gap_reason(&self.reason.format_for_latex()))
+            ensure_dot(translate_gap_reason(&self.reason.format_for_latex(config)))
         )
     }
 }
@@ -404,5 +408,4 @@ fn normalize_text(mut text: String) -> String {
     text = text.replace('#', r"\#");
     text
 }
-
 

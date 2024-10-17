@@ -38,11 +38,11 @@ impl Latex {
 
 impl TextFormatter for Latex {
     fn set_title(&mut self, title: Option<String>) {
-        self.config.title = title.map(|x| x.format_for_latex());
+        self.config.title = title.map(|x| x.format_for_latex(&self.config));
     }
 
     fn set_author(&mut self, author: Option<String>) {
-        self.config.author = author.map(|x| x.format_for_latex());
+        self.config.author = author.map(|x| x.format_for_latex(&self.config));
     }
 
     fn set_catchwords(&mut self, catchwords: bool) {
@@ -55,8 +55,8 @@ impl TextFormatter for Latex {
 
     fn add_work(&mut self, work: Work) {
         let work = Work {
-            title: work.title.format_for_latex(),
-            alt_title: work.alt_title.map(|x| x.format_for_latex()),
+            title: work.title.format_for_latex(&self.config),
+            alt_title: work.alt_title.map(|x| x.format_for_latex(&self.config)),
             ..work
         };
 
@@ -224,7 +224,7 @@ impl TextFormatter for Latex {
                 );
             }
 
-            text.push_str(&work.text.format_for_latex());
+            text.push_str(&work.text.format_for_latex(&self.config));
         }
 
         text.push_str(r"\renewcommand{\altchapter}{}");
