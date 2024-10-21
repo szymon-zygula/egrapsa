@@ -111,28 +111,12 @@ impl TextFormatter for Latex {
 \newcommand{\c@greekalpha}[1]{%
   {%
     \ifcase\number\value{#1}%
-    \or
-    α´
-    \or
-    β´
-    \or
-    γ´
-    \or
-    δ´
-    \or
-    ε´
-    \or
-    ϛ´
-    \or
-    ζ´
-    \or
-    η´
-    \or
-    θ´
-    \or
-    ι´
-    \or
-    ια´
+    \or α´\or β´\or γ´\or δ´\or ε´\or ϛ´\or ζ´\or η´\or θ´\or ι´%
+    \or ια´\or ιβ´\or ιγ´\or ιδ´\or ιε´\or ιϛ´\or ιζ´\or ιη´\or ιθ´%
+    \or κα´\or κβ´\or κγ´\or κδ´\or κε´\or κϛ´\or κζ´\or κη´\or κθ´%
+    \or λα´\or λβ´\or λγ´\or λδ´\or λε´\or λϛ´\or λζ´\or λη´\or λθ´%
+    \or μα´\or μβ´\or μγ´\or μδ´\or με´\or μϛ´\or μζ´\or μη´\or μθ´%
+    \or να´\or νβ´\or νγ´\or νδ´\or νε´\or νϛ´\or νζ´\or νη´\or νθ´%
     \fi
   }%
 }
@@ -280,6 +264,7 @@ impl TextFormatter for Latex {
                 ));
             }
 
+            text.push_str("\\setcounter{section}{0}\n");
             text.push_str("\\thispagestyle{plain}\n");
             text.push_str(&format!(
                 "\\renewcommand{{\\orgchapter}}{{{}.}}\n",
