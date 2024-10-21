@@ -109,7 +109,7 @@ fn read_text(reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>, start_tag: BytesStar
             Ok(Event::Start(tag)) => match name_to_str(&tag.name()) {
                 "p" | "div" | "del" | "foreign" | "label" | "q" | "title" | "quote" | "l"
                 | "cit" | "said" | "add" | "corr" | "num" | "sp" | "speaker" | "sic" | "reg"
-                | "date" | "app" | "lem" | "choice" | "abbr" | "ex" | "expan" | "desc" => {
+                | "ref" | "date" | "app" | "lem" | "choice" | "abbr" | "ex" | "expan" | "desc" => {
                     let tag = tag.to_owned();
                     let text = read_text(reader, buf, tag);
                     subtexts.push(Box::new(text));
@@ -237,6 +237,7 @@ fn get_text_kind(tag: &BytesStart) -> TextNodeKind {
         "app" => TextNodeKind::Apparatus,
         "lem" => TextNodeKind::Lemma,
         "reg" => TextNodeKind::Regularized,
+        "ref" => TextNodeKind::Ref,
         "choice" => TextNodeKind::Choice,
         "abbr" => TextNodeKind::Abbreviated,
         "ex" => TextNodeKind::Expanded,
@@ -263,6 +264,7 @@ fn get_text_kind(tag: &BytesStart) -> TextNodeKind {
                 "section" => TextNodeKind::Paragraph,
                 "book" => TextNodeKind::Section,
                 "chapter" => TextNodeKind::Chapter,
+                "actio" => TextNodeKind::Chapter,
                 name => panic!("Invalid div subtype for text kind: {name}"),
             },
             name => panic!("Invalid div type for text kind: {name}"),

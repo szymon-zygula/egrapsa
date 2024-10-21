@@ -50,6 +50,7 @@ pub enum TextNodeKind {
     Speaker,
     DialogueEntry,
     Regularized,
+    Ref,
     Date,
     Apparatus,
     Lemma,
@@ -93,6 +94,7 @@ impl TextNode for TextParent {
                 formatted = String::new()
             }
             TextNodeKind::Regularized => {}
+            TextNodeKind::Ref => {}
             TextNodeKind::Apparatus => {}
             TextNodeKind::Date => {}
             TextNodeKind::Speaker => {
@@ -114,18 +116,20 @@ impl TextNode for TextParent {
             TextNodeKind::Chapter => {}
             TextNodeKind::Lemma => {}
             TextNodeKind::Section => {
-                let name = self
-                    .name
-                    .as_ref()
-                    .map(|s| s.format_for_latex(config))
-                    .unwrap_or(
-                        match config.language {
-                            crate::formatters::Language::Latin => r"Liber \Roman{section}",
-                            crate::formatters::Language::Greek => r"Βιβλίος \greekalpha{section}",
-                        }
-                        .to_string(),
-                    );
-                formatted = format!(r"\section[{name}]{{{name}.}}{formatted}");
+                let prename = match config.language {
+                    crate::formatters::Language::Latin => r"Liber \Roman{section}",
+                    crate::formatters::Language::Greek => r"Βιβλίος \greekalpha{section}",
+                }
+                .to_string();
+
+                let full_name =
+                    if let Some(name) = self.name.as_ref().map(|s| s.format_for_latex(config)) {
+                        format!("{prename}. {name}")
+                    } else {
+                        format!("{prename}")
+                    };
+
+                formatted = format!(r"\section[{full_name}]{{{full_name}.}}{formatted}");
             }
             TextNodeKind::SubSection => {
                 let name = self
@@ -398,8 +402,8 @@ fn replace_words(mut text: String, word: &str, replacement: &str) -> String {
 }
 
 fn replace_et_ampersand(mut text: String) -> String {
-    text = replace_words(text, "et", "\\&");
-    text = replace_words(text, "etc", "\\&c");
+    text = replace_words(text, "et", r"\&");
+    text = replace_words(text, "etc", r"\&c");
     text
 }
 
@@ -415,9 +419,17 @@ fn replace_ae_oe(mut text: String) -> String {
     text
 }
 
+fn escape_special_chars(mut text: String) -> String {
+    text = text.replace('#', r"\#");
+    text = text.replace('\\', r"\\");
+    text = text.replace('&', r"\&");
+    text = text.replace('_', r"\_");
+    text
+}
+
 fn normalize_text(mut text: String) -> String {
+    text = escape_special_chars(text);
     text = replace_et_ampersand(text);
     text = replace_ae_oe(text);
-    text = text.replace('#', r"\#");
     text
 }

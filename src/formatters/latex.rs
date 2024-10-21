@@ -196,7 +196,7 @@ impl TextFormatter for Latex {
             text.push_str(
                 r"
 \fancyfoot[R]{\usebox\NextWordBox}
-                      ",
+",
             );
         }
 
@@ -205,14 +205,14 @@ impl TextFormatter for Latex {
 \fancypagestyle{plain}{
 \fancyhf{}
 \fancyhead[RO, LE]{\thepage}
-                      ",
+",
         );
 
         if self.config.catchwords {
             text.push_str(
                 r"
 \fancyfoot[R]{\usebox\NextWordBox}
-                      ",
+",
             );
         }
 
@@ -221,7 +221,7 @@ impl TextFormatter for Latex {
 }
 \renewcommand\headrulewidth{0pt}
 \pagestyle{fancy}
-                      ",
+",
         );
 
         if let Some(author) = self.config.author.as_ref() {
