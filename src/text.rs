@@ -339,14 +339,21 @@ fn fix_punctuation(text: String, p: &str) -> String {
         // Block replacing before quotation marks
         .replace("\x00'", "\x01'")
         .replace("\x00\"", "\x01\"")
+        // Block replacing before end of parentheses
+        .replace("\x00)", "\x01)")
+        .replace("\x00}", "\x01}")
+        .replace("\x00]", "\x01]")
         // Normalize spaces everywhere
         .replace("\x00", "\x00 ") // Double spaces are fixed later in `fix_text`
         .replace(" \x00", "\x00")
         // Restore before quotation marks
         .replace("\x01", "\x00")
-        // Normalize spaces next to quotation marks
+        // Normalize spaces next to quotation marks and parentheses
         .replace(" \x00'", "\x00'")
         .replace(" \x00\"", "\x00\"")
+        .replace(" \x00)", "\x00)")
+        .replace(" \x00}", "\x00}")
+        .replace(" \x00]", "\x00]")
         // Restore `p`
         .replace("\x00", p)
 }
