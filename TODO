@@ -1,5 +1,6 @@
 BEFORE PRINTING:
 Remove Section numbers from table of contents
+Reset section counter in new chapters
 Reflace FINIS at the end with a nice picture with text.
 Reduce footer when no footnotes are present.
 Change header to <title> (<alt title>) | <book>

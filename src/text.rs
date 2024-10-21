@@ -36,6 +36,7 @@ pub enum TextNodeKind {
     SubSection,
     Subsection,
     Paragraph,
+    Epigram,
     Note,
     Deleted,
     Label,
@@ -147,6 +148,7 @@ impl TextNode for TextParent {
             TextNodeKind::Paragraph => {
                 formatted.push_str("\n\n");
             }
+            TextNodeKind::Epigram => {}
             TextNodeKind::Note => {}
             TextNodeKind::Highlight => {}
             TextNodeKind::Deleted => {}

@@ -156,6 +156,7 @@ fn read_text(reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>, start_tag: BytesStar
             }
             Ok(Event::Empty(tag)) => subtexts.push(read_empty_tag(&tag)),
             Err(e) => panic!("Expected text, got error: {e}"),
+            Ok(Event::Comment(_)) => {}
             ev => panic!("Missing text, got event: {ev:?}"),
         }
     }
@@ -231,7 +232,7 @@ fn name_to_str<'a>(name: &QName<'a>) -> &'a str {
 }
 
 fn get_text_kind(tag: &BytesStart) -> TextNodeKind {
-    match name_to_str(&tag.name()) {
+    match name_to_str(&tag.name()).to_lowercase().as_str() {
         "head" | "foreign" | "quote" | "add" => TextNodeKind::Simple,
         "date" => TextNodeKind::Date,
         "app" => TextNodeKind::Apparatus,
@@ -257,10 +258,11 @@ fn get_text_kind(tag: &BytesStart) -> TextNodeKind {
         "del" => TextNodeKind::Deleted,
         "q" => TextNodeKind::Quote,
         "cit" => TextNodeKind::BlockQuote,
-        "div" => match get_attr_val(tag, "type").as_str() {
+        "div" => match get_attr_val(tag, "type").to_lowercase().as_str() {
             "edition" => TextNodeKind::Book,
-            "textpart" => match get_attr_val(tag, "subtype").as_str() {
+            "textpart" => match get_attr_val(tag, "subtype").to_lowercase().as_str() {
                 // section -> paragraph is correct, it's basically how Scaife treats sections
+                "epigram" => TextNodeKind::Epigram,
                 "section" => TextNodeKind::Paragraph,
                 "book" => TextNodeKind::Section,
                 "chapter" => TextNodeKind::Chapter,
