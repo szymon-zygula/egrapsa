@@ -87,6 +87,7 @@ impl TextFormatter for Latex {
 \usepackage{needspace}
 \usepackage{etoolbox}
 \usepackage{mparhack}
+\usepackage{psvectorian}
 \geometry{a5paper, bottom=2.5cm}
 
 \usepackage[utf8]{inputenc}",
@@ -335,8 +336,12 @@ impl TextFormatter for Latex {
 
         text.push_str(
             r"
+\vfill
 \center
-\textbf{FINIS.}
+\begin{pspicture}(-1.5,-3.5)(1.5,1.5)%
+\rput(0,0){\Large \textbf{FINIS.}}
+\rput[t](0,-1.0){\psvectorian[width=5cm]{68}}
+\end{pspicture}%
 \renewcommand{\altchapter}{}
 \clearpage\null\thispagestyle{empty}
 \Ifthispageodd{%
