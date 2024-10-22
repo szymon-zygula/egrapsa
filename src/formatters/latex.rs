@@ -87,7 +87,7 @@ impl TextFormatter for Latex {
 \usepackage{needspace}
 \usepackage{etoolbox}
 \usepackage{mparhack}
-\geometry{a5paper}
+\geometry{a5paper, bottom=2.5cm}
 
 \usepackage[utf8]{inputenc}",
         );
