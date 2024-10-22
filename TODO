@@ -1,8 +1,8 @@
 BEFORE PRINTING:
-Remove Section numbers from table of contents
-Reflace FINIS at the end with a nice picture with text.
+Replace FINIS at the end with a nice picture with text.
 Reduce footer when no footnotes are present.
 Change header to <title> (<alt title>) | <book>
+Start section on odd pages.
 
 SECONDARY:
 Font selection.

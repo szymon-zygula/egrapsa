@@ -130,7 +130,14 @@ impl TextNode for TextParent {
                         format!("{prename}")
                     };
 
-                formatted = format!(r"\section[{full_name}]{{{full_name}.}}{formatted}");
+                formatted = format!(
+                    r"
+\stepcounter{{section}}
+\section*{{{full_name}.}}
+\addcontentsline{{toc}}{{section}}{{{full_name}}}
+{formatted}
+"
+                );
             }
             TextNodeKind::SubSection => {
                 let name = self
