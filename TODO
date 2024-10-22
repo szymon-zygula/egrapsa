@@ -1,4 +1,5 @@
 BEFORE PRINTING:
+fix \Needsspace being put between marginpar and speaker (e.g. Βίων Πρᾶσις)
 
 SECONDARY:
 Font selection.
