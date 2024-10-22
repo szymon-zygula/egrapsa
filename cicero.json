@@ -1,0 +1,31 @@
+{
+    "name": "Ciceros's speeches",
+    "formatter_type": "Latex",
+    "formatter_config": {
+        "title": "Orationes",
+        "author": "Marcus Tulius Cicero",
+        "catchwords": false,
+        "margin_notes": true,
+        "footnotes": false,
+        "language": "Latin"
+    },
+    "source_type": "Scaife",
+    "work_infos": [
+        {
+            "title": "Pro P. Quinctio",
+            "identifier": "urn:cts:latinLit:phi0474.phi001.perseus-lat2:1-99"
+        },
+        {
+            "title": "Pro S. Roscio Amerino",
+            "identifier": "urn:cts:latinLit:phi0474.phi002.perseus-lat2:1-154"
+        },
+        {
+            "title": "Pro Q. Roscio Comoedo",
+            "identifier": "urn:cts:latinLit:phi0474.phi003.perseus-lat2:1-56"
+        },
+        {
+            "title": "Divinatio in Q. Caecilium",
+            "identifier": "urn:cts:latinLit:phi0474.phi004.perseus-lat2:1-73"
+        }
+    ]
+}

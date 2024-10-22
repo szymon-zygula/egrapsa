@@ -1,0 +1,20 @@
+{
+    "name": "Phalaris",
+    "formatter_type": "Latex",
+    "formatter_config": {
+        "title": "Phalaris",
+        "author": "Lucianus Samosatensis",
+        "catchwords": false,
+        "margin_notes": true,
+        "footnotes": false,
+        "language": "Greek"
+    },
+    "source_type": "Scaife",
+    "work_infos": [
+        {
+            "title": "Φάλαρις",
+            "alt_title": "Phalaris",
+            "identifier": "urn:cts:greekLit:tlg0062.tlg001.perseus-grc2:1.1-2.13"
+        }
+    ]
+}
