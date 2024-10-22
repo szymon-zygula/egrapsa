@@ -123,18 +123,23 @@ impl TextNode for TextParent {
                 }
                 .to_string();
 
-                let full_name =
-                    if let Some(name) = self.name.as_ref().map(|s| s.format_for_latex(config)) {
-                        format!("{prename}. {name}")
-                    } else {
-                        format!("{prename}")
-                    };
+                let full_name;
+                let full_name_nl;
+                if let Some(name) = self.name.as_ref().map(|s| s.format_for_latex(config)) {
+                    full_name = format!("{prename}. {name}");
+                    full_name_nl = format!(r"{prename}.\\{name}");
+                } else {
+                    full_name = format!("{prename}");
+                    full_name_nl = full_name.clone();
+                };
 
                 formatted = format!(
                     r"
 \stepcounter{{section}}
-\section*{{{full_name}.}}
+\renewcommand{{\rectohead}}{{{full_name}}}
+\section*{{{full_name_nl}.}}
 \addcontentsline{{toc}}{{section}}{{{full_name}}}
+\renewcommand{{\orgsection}}{{{full_name}}}
 {formatted}
 "
                 );

@@ -165,12 +165,30 @@ impl TextFormatter for Latex {
 \titleformat{\chapter}[display]{\normalfont\bfseries}{}{0pt}{\Huge\center}
 \renewcommand{\chaptermark}[1]{\markboth{#1}{}}
 
+% Start new sections on new pages
+\AddToHook{cmd/section/before}{%
+    \ifnum\value{section}=1%
+    \else%
+        % If current page is odd, it means that that the page left to the new section is going to be empty,
+        % and so the title of the current work won't be visible anywhere. In that case it is added
+        % by \thispagestyle{sectionpage}. Otherwise we can use plain style.
+        \Ifthispageodd{%
+            \cleardoublepage\thispagestyle{sectionpage}%
+        }{%
+            \cleardoublepage\thispagestyle{plain}%
+        }%
+    \fi%
+}
+
 \newcommand{\altchapter}{}
 \newcommand{\orgchapter}{}
+\newcommand{\orgsection}{}
+\newcommand{\rectohead}{}
+\newcommand{\versohead}{}
 \fancyhf{}
 \fancyhead[LE, RO]{\thepage}
-\fancyhead[CE]{\orgchapter}
-\fancyhead[CO]{\altchapter}
+\fancyhead[CE]{\versohead}
+\fancyhead[CO]{\rectohead}
 \setlength{\headheight}{14.5pt}
 \setlength{\marginparpush}{-6pt}
 ",
@@ -207,6 +225,26 @@ impl TextFormatter for Latex {
 \pagestyle{fancy}
 ",
         );
+
+        // Use "versohead" on recto pages where new sections begin,
+        // so that name of the work is visible
+        text.push_str(
+            r"
+\fancypagestyle{sectionpage}{
+\fancyhf{}
+\fancyhead[CO]{\versohead}
+\fancyhead[RO, LE]{\thepage}
+",
+        );
+
+        if self.config.catchwords {
+            text.push_str(
+                r"
+\fancyfoot[R]{\usebox\NextWordBox}
+",
+            );
+        }
+        text.push_str("}");
 
         if let Some(author) = self.config.author.as_ref() {
             text.push_str(r"\author{");
@@ -265,19 +303,29 @@ impl TextFormatter for Latex {
             }
 
             text.push_str("\\setcounter{section}{0}\n");
+            text.push_str("\\renewcommand{\\rectohead}{}\n");
+            text.push_str("\\renewcommand{\\orgsection}{}\n");
             text.push_str("\\thispagestyle{plain}\n");
             text.push_str(&format!(
-                "\\renewcommand{{\\orgchapter}}{{{}.}}\n",
+                "\\renewcommand{{\\orgchapter}}{{{}}}\n",
                 work.title
             ));
             text.push_str(&format!(
-                "\\renewcommand{{\\altchapter}}{{{}.}}\n",
+                "\\renewcommand{{\\altchapter}}{{{}}}\n",
                 work.alt_title.as_ref().unwrap_or(&work.title)
             ));
+
             if work.alt_title.is_some() {
                 text.push_str(
                     r"
-\likechapter{\altchapter}
+\likechapter{\altchapter.}
+\renewcommand{\versohead}{\orgchapter.}
+",
+                );
+            } else {
+                text.push_str(
+                    r"
+\renewcommand{\versohead}{\orgchapter.}
 ",
                 );
             }
