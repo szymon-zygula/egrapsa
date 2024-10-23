@@ -1,5 +1,4 @@
 BEFORE PRINTING:
-fix \Needsspace being put between marginpar and speaker (e.g. Βίων Πρᾶσις)
 
 SECONDARY:
 Font selection.
@@ -8,3 +7,4 @@ Refactor TextNodeKind, formatting selection, generation in scaife etc. (so that 
 Use long s option
 Use old ligatures option
 Refactor LaTeX formatting (string hell)
+fix \Needsspace being put between marginpar and speaker (e.g. Βίων Πρᾶσις)
