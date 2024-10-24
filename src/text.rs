@@ -44,6 +44,7 @@ pub enum TextNodeKind {
     BlockQuote,
     Sic,
     Italics,
+    PersonName,
     Line,
     Simple,
     Corrected,
@@ -184,6 +185,7 @@ impl TextNode for TextParent {
                 text.push_str("}");
                 formatted = text;
             }
+            TextNodeKind::PersonName => {}
             TextNodeKind::Line => {
                 formatted.push_str("\n\\\\");
             }
@@ -248,6 +250,22 @@ impl TextNode for ParagraphNumber {
 pub struct LineNumber(pub String);
 
 impl TextNode for LineNumber {
+    fn to_string(&self) -> String {
+        self.0.clone()
+    }
+
+    fn format_for_latex(&self, config: &FormatterConfig) -> String {
+        let mut text = String::from(r"\alignedmarginpar{");
+        text.push_str(&self.0.format_for_latex(config));
+        text.push_str("}");
+        text
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct MarginNote(pub String);
+
+impl TextNode for MarginNote {
     fn to_string(&self) -> String {
         self.0.clone()
     }

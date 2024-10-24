@@ -1,7 +1,7 @@
 use super::{GetTextError, GetTextResult, TextSource};
 use crate::text::{
-    fix_text, Footnote, Gap, Highlight, LineNumber, Milestone, ParagraphNumber, TextNode,
-    TextNodeKind, TextParent,
+    fix_text, Footnote, Gap, Highlight, LineNumber, MarginNote, Milestone, ParagraphNumber,
+    TextNode, TextNodeKind, TextParent,
 };
 use quick_xml::{
     events::{BytesEnd, BytesStart, Event},
@@ -109,7 +109,8 @@ fn read_text(reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>, start_tag: BytesStar
             Ok(Event::Start(tag)) => match name_to_str(&tag.name()) {
                 "p" | "div" | "del" | "foreign" | "label" | "q" | "title" | "quote" | "l"
                 | "cit" | "said" | "add" | "corr" | "num" | "sp" | "speaker" | "sic" | "reg"
-                | "ref" | "date" | "app" | "lem" | "choice" | "abbr" | "ex" | "expan" | "desc" => {
+                | "ref" | "date" | "app" | "lem" | "choice" | "abbr" | "ex" | "expan" | "desc"
+                | "persName" => {
                     let tag = tag.to_owned();
                     let text = read_text(reader, buf, tag);
                     subtexts.push(Box::new(text));
@@ -200,9 +201,25 @@ fn expect_eof(reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>) {
 
 fn read_empty_tag(tag: &BytesStart) -> Box<dyn TextNode> {
     match name_to_str(&tag.name()) {
-        "l" => Box::new(""), // Sometimes <l/> appears for not reason. Seems to be some junk.
-        "pb" => Box::new(ParagraphNumber(get_attr_val(&tag, "n"))),
-        "lb" => Box::new(LineNumber(get_attr_val(&tag, "n"))),
+        // Sometimes <X /> appears for not reason,
+        // where X should never be an empty tag.
+        // Seems to be some junk.
+        "l" | "p" => Box::new(""),
+        "pb" => {
+            if let Some(x) = get_attr_val_opt(&tag, "n") {
+                Box::new(ParagraphNumber(x))
+            } else {
+                Box::new("")
+            }
+        }
+        "lb" => {
+            if let Some(x) = get_attr_val_opt(&tag, "n") {
+                Box::new(LineNumber(x))
+            } else {
+                Box::new("")
+            }
+        }
+        "note" => Box::new(MarginNote(get_attr_val(&tag, "n"))),
         "gap" => {
             let reason = get_attr_val(tag, "reason");
             let rend = get_attr_val_opt(tag, "rend");
@@ -222,7 +239,7 @@ fn read_empty_tag(tag: &BytesStart) -> Box<dyn TextNode> {
         }
         "space" => Box::new(" "),
         name @ _ => {
-            panic!("Unexpected tag found inside section: <{}>", name)
+            panic!("Unexpected empty tag found inside section: <{}/>", name)
         }
     }
 }
@@ -252,6 +269,7 @@ fn get_text_kind(tag: &BytesStart) -> TextNodeKind {
         "l" => TextNodeKind::Line,
         "label" => TextNodeKind::Label,
         "title" => TextNodeKind::Italics,
+        "persname" => TextNodeKind::PersonName,
         "hi" => TextNodeKind::Highlight,
         "p" | "said" => TextNodeKind::Paragraph,
         "gap" | "note" | "bibl" => TextNodeKind::Note,
@@ -263,7 +281,8 @@ fn get_text_kind(tag: &BytesStart) -> TextNodeKind {
             "textpart" => match get_attr_val(tag, "subtype").to_lowercase().as_str() {
                 // section -> paragraph is correct, it's basically how Scaife treats sections
                 "epigram" => TextNodeKind::Epigram,
-                "section" => TextNodeKind::Paragraph,
+                // No idea why "textpart" appears as "subtype" sometimes
+                "textpart" | "section" => TextNodeKind::Paragraph,
                 "book" => TextNodeKind::Section,
                 "chapter" => TextNodeKind::Chapter,
                 "actio" => TextNodeKind::Chapter,
