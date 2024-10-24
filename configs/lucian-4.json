@@ -1,0 +1,145 @@
+{
+    "name": "Lucian's complete works",
+    "formatter_type": "Latex",
+    "formatter_config": {
+        "title": "Opera Omnia",
+        "author": "Lucianus Samosatensis",
+        "catchwords": false,
+        "margin_notes": false,
+        "footnotes": false,
+        "language": "Greek"
+    },
+    "source_type": "Scaife",
+    "work_infos": [
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg001.perseus-grc2:1.1-2.13",
+            "title": "Φάλαρις",
+            "alt_title": "Phalaris"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg002.perseus-grc2:1-8",
+            "title": "Ἱππίας ἢ Βαλανεῖον",
+            "alt_title": "Hippias"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg005.perseus-grc2:1-6",
+            "title": "Περὶ τοῦ Ἡλέκτρου ἢ Κύκνων",
+            "alt_title": "Electrum"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg006.perseus-grc2:1-12",
+            "title": "Μυίας Ἐγκώμιον",
+            "alt_title": "Muscae Encomium"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg007.perseus-grc2:prologue-38",
+            "title": "Νιγρίνου Φιλοσοφία",
+            "alt_title": "Nigrinus"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg008.perseus-grc2:1-67",
+            "title": "Δημώνακτος Βίος",
+            "alt_title": "Demonax"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg009.perseus-grc2:1-32",
+            "title": "Περὶ τοῦ Οἴκου",
+            "alt_title": "De Domo"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg010.perseus-grc2:1-12",
+            "title": "Πατρίδος Ἐγκώμιον",
+            "alt_title": "Patriae Encomium"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg013.perseus-grc2:1-32",
+            "title": "Περὶ τοῦ μὴ ῥᾳδίως πιστεύειν Διαβολῇ",
+            "alt_title": "Calumniae non temere credendum"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg015.perseus-grc2:1-48",
+            "title": "Συμπόσιον ἢ Λαπίθαι",
+            "alt_title": "Symposium"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg016.perseus-grc2:1-29",
+            "title": "Κατάπλους ἢ Τύραννος",
+            "alt_title": "Cataplus"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg017.perseus-grc2:1-19",
+            "title": "Ζεὺς ἐλεγχόμενος",
+            "alt_title": "Jupiter confutatus"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg019.perseus-grc2:1-33",
+            "title": "Ὄνειρος ἢ Ἀλεκτρυών",
+            "alt_title": "Gallus"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg020.perseus-grc2:1-21",
+            "title": "Προμηθεύς",
+            "alt_title": "Prometheus"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg021.perseus-grc2:1-34",
+            "title": "Ἰκαρομένιππος ἢ Ὑπερνέφελος",
+            "alt_title": "Icaromenippus"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg022.perseus-grc2:1-58",
+            "title": "Τίμων",
+            "alt_title": "Timon"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg023.perseus-grc2:1-24",
+            "title": "Χάρων ἢ Ἐπισκοποῦντες",
+            "alt_title": "Charon sive Contemplantes"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg024.perseus-grc2:1-27",
+            "title": "Βίων Πρᾶσις",
+            "alt_title": "Vitarum auctio"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg025.perseus-grc2:1-52",
+            "title": "Ἀναβιοῦντες ἢ Ἁλιεύς",
+            "alt_title": "Revivescentes sive Piscator"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg026.perseus-grc2:1-35",
+            "title": "Δὶς κατηγορούμενος",
+            "alt_title": "Bis accusatus sive Tribunalia"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg027.perseus-grc2:1-15",
+            "title": "Περὶ Θυσιῶν",
+            "alt_title": "De Sacrificiis"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg028.perseus-grc2:1-30",
+            "title": "Πρὸς τὸν ἀπαίδευτον καὶ πολλὰ βιβλία ὠνούμενον",
+            "alt_title": "Adversus Indoctum"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg029.perseus-grc2:1-18",
+            "title": "Περὶ τοῦ Ἐνυπνίου ἤτοι Βίος Λουκιανοῦ",
+            "alt_title": "Somnium sive Vita Luciani"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg031.perseus-grc2:1-40",
+            "title": "Φιλοψευδὴς ἢ Ἀπιστῶν",
+            "alt_title": "Philopseudes sive Incredulus"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg033.perseus-grc2:1-42",
+            "title": "Περὶ τῶν ἐν Μισθῷ συνόντων",
+            "alt_title": "De Mercede conductis"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg034.perseus-grc2:1-40",
+            "title": "Ἀνάχαρσις ἢ Περὶ Γυμνασίων",
+            "alt_title": "Anacharsis"
+        }
+    ]
+}

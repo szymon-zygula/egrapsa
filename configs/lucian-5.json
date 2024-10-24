@@ -1,0 +1,155 @@
+{
+    "name": "Lucian's complete works",
+    "formatter_type": "Latex",
+    "formatter_config": {
+        "title": "Opera Omnia",
+        "author": "Lucianus Samosatensis",
+        "catchwords": false,
+        "margin_notes": false,
+        "footnotes": false,
+        "language": "Greek"
+    },
+    "source_type": "Scaife",
+    "work_infos": [
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg035.perseus-grc2:1-22",
+            "title": "Μένιππος ἢ Νεκυομαντεία",
+            "alt_title": "Necyomantia"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg036.perseus-grc2:1-24",
+            "title": "Περὶ Πένθους",
+            "alt_title": "De Luctu"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg037.perseus-grc2:1-26",
+            "title": "Ῥητόρων Διδάσκαλος",
+            "alt_title": "Rhetorum Praeceptor"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg038.perseus-grc2:1-61",
+            "title": "Ἀλέξανδρος ἢ Ψευδόμαντις",
+            "alt_title": "Alexander"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg039.perseus-grc2:1-23",
+            "title": "Εἰκόνες",
+            "alt_title": "Imagines"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg045.perseus-grc2:1-85",
+            "title": "Περὶ Ὀρχήσεως",
+            "alt_title": "De Saltatione"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg046.perseus-grc2:1-25",
+            "title": "Λεξιφάνης",
+            "alt_title": "Lexiphanes"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg047.perseus-grc2:1-13",
+            "title": "Εὐνοῦχος",
+            "alt_title": "Eunuchus"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg040.perseus-grc2:1-29",
+            "title": "Ὑπὲρ τῶν Εἰκόνων",
+            "alt_title": "Pro Imaginibus"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg049.perseus-grc2:1-32",
+            "title": "Ψευδολογιστής",
+            "alt_title": "Pseudologista"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg051.perseus-grc2:0-22",
+            "title": "Τυραννοκτόνος",
+            "alt_title": "Tyrannicida"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg052.perseus-grc2:0-32",
+            "title": "Ἀποκηρυττόμενος",
+            "alt_title": "Abdicatus"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg042.perseus-grc2:1-45",
+            "title": "Περὶ τῆς Περεγρίνου Τελευτῆς",
+            "alt_title": "De Morte Peregrini"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg043.perseus-grc2:1-33",
+            "title": "Δραπέται",
+            "alt_title": "Fugitivi"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg044.perseus-grc2:1-63",
+            "title": "Τόξαρις ἢ Φιλία",
+            "alt_title": "Toxaris sive Amicitia"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg053.perseus-grc2:1-63",
+            "title": "Πῶς δεῖ Ἱστορίαν συγγράφειν",
+            "alt_title": "Quomodo Historia conscribenda sit"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg054.perseus-grc2:1-9",
+            "title": "Περὶ τῶν Διψάδων",
+            "alt_title": "Dipsades"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg055.perseus-grc2:1-39",
+            "title": "Τὰ πρὸς Κρόνον",
+            "alt_title": "Saturnalia"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg056.perseus-grc2:1-8",
+            "title": "Ἡρόδοτος ἢ Ἀετίων",
+            "alt_title": "Herodotus"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg057.perseus-grc2:1-12",
+            "title": "Ζεύξις ἢ Ἀντίοχος",
+            "alt_title": "Zeuxis"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg058.perseus-grc2:1-19",
+            "title": "Ὑπὲρ τοῦ ἐν τῇ Προσαγορεύσει Πταίσματος",
+            "alt_title": "Pro Lapsu inter salutandum"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg059.perseus-grc2:1-15",
+            "title": "Ἀπολογία",
+            "alt_title": "Apologia"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg060.perseus-grc2:1-4",
+            "title": "Ἁρμονίδης",
+            "alt_title": "Harmonides"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg061.perseus-grc2:1-9",
+            "title": "Διάλογος πρὸς Ἡσίοδον",
+            "alt_title": "Hesiodus"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg071.perseus-grc2:1-334",
+            "title": "Ποδάγρα",
+            "alt_title": "Podagra"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg063.perseus-grc2:1-86",
+            "title": "Ἑρμότιμος ἢ Περὶ Αἱρέσεων",
+            "alt_title": "Hermotimus"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg065.perseus-grc2:1-46",
+            "title": "Πλοῖον ἢ Εὐχαί",
+            "alt_title": "Navigium"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg062.perseus-grc2:1-11",
+            "title": "Σκύθης ἢ Πρόξενος",
+            "alt_title": "Scytha"
+        }
+    ]
+}

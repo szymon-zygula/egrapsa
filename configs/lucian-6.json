@@ -1,0 +1,75 @@
+{
+    "name": "Pseudolucian's complete works",
+    "formatter_type": "Latex",
+    "formatter_config": {
+        "title": "Opera Omnia",
+        "author": "Pseudolucianus Samosatensis",
+        "catchwords": false,
+        "margin_notes": false,
+        "footnotes": false,
+        "language": "Greek"
+    },
+    "source_type": "Scaife",
+    "work_infos": [
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg011.perseus-grc2:1-29",
+            "title": "Μακρόβιοι",
+            "alt_title": "Macrobii"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg014.perseus-grc2:1-12",
+            "title": "Δίκη Συμφώνων",
+            "alt_title": "Judicium Vocalium"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg070.perseus-grc2:1-12",
+            "title": "Ψευδοσοφιστής ἢ Σολοικιστής",
+            "alt_title": "Soleocista"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg030.perseus-grc2:1-61",
+            "title": "Περὶ τοῦ Παρασίτου ὅτι Τέχνη ἡ Παρασιτική",
+            "alt_title": "De Parasito"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0062.tlg048.perseus-grc2:1-29",
+            "title": "Περὶ τῆς Ἀστρολογίας",
+            "alt_title": "De Astrologia"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0061.tlg002.1st1K-grc1:1-54",
+            "title": "Ἔρωτες",
+            "alt_title": "Amores"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0061.tlg003.1st1K-grc1:1-50",
+            "title": "Δημοσθένους Ἐγκώμιον",
+            "alt_title": "Demosthenis Encomium"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0061.tlg004.1st1K-grc1:1-8",
+            "title": "Ἀλκυὼν ἢ Περὶ Μεταμορφώσεων",
+            "alt_title": "Halcyon"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0061.tlg005.1st1K-grc1:0-173",
+            "title": "Ὠκύπους",
+            "alt_title": "Ocypus"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0061.tlg006.1st1K-grc1:1-20",
+            "title": "Κυνικός",
+            "alt_title": "Cynicus"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0061.tlg007.1st1K-grc1:1-29",
+            "title": "Φιλόπατρις ἢ Διδασκόμενος",
+            "alt_title": "Philopatris"
+        },
+        {
+            "identifier": "urn:cts:greekLit:tlg0061.tlg008.1st1K-grc1:1-28",
+            "title": "Χαρίδημος ἢ Περὶ Κάλλους",
+            "alt_title": "Charidemus"
+        }
+    ]
+}
