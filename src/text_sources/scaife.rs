@@ -10,29 +10,44 @@ use quick_xml::{
 };
 use ureq;
 
-pub struct Scaife {}
+trait ScaifeSource {
+    fn open(&self, reader: &mut quick_xml::Reader<&[u8]>, buf: &mut Vec<u8>);
+    fn close(&self, reader: &mut quick_xml::Reader<&[u8]>, buf: &mut Vec<u8>);
+    fn text(&self) -> &str;
+}
 
-impl Scaife {
-    fn text_url(id: &str) -> String {
-        format!("https://scaife.perseus.org/library/{}/cts-api-xml", id)
+struct ScaifeFile {
+    text: String,
+}
+
+impl ScaifeSource for ScaifeFile {
+    fn open(&self, reader: &mut quick_xml::Reader<&[u8]>, buf: &mut Vec<u8>) {
+        skip_expect_decl(reader, buf);
+        skip_expect_pi(reader, buf);
+        expect_opening_tag(reader, buf, "TEI");
+        skip_expect_tag(reader, buf, "teiHeader");
+        expect_opening_tag(reader, buf, "text");
+        expect_opening_tag(reader, buf, "body");
+    }
+
+    fn close(&self, reader: &mut quick_xml::Reader<&[u8]>, buf: &mut Vec<u8>) {
+        expect_closing_tag(reader, buf, "body");
+        expect_closing_tag(reader, buf, "text");
+        expect_closing_tag(reader, buf, "TEI");
+        expect_eof(reader, buf);
+    }
+
+    fn text(&self) -> &str {
+        &self.text
     }
 }
 
-impl TextSource for Scaife {
-    fn get_text(&self, id: &str) -> GetTextResult {
-        let body = ureq::get(&Self::text_url(id))
-            .call()
-            .map_err(|_| GetTextError::ConnectionError)?
-            .into_string()
-            .map_err(|_| GetTextError::EncodingError)?;
+struct ScaifeUrn {
+    text: String,
+}
 
-        let mut out = std::fs::File::create("debug.xml").unwrap();
-        std::io::Write::write_all(&mut out, body.as_bytes()).unwrap();
-
-        let reader = &mut quick_xml::Reader::from_str(&body);
-        reader.trim_text(true);
-        let buf = &mut Vec::new();
-
+impl ScaifeSource for ScaifeUrn {
+    fn open(&self, reader: &mut quick_xml::Reader<&[u8]>, buf: &mut Vec<u8>) {
         expect_opening_tag(reader, buf, "GetPassage");
         skip_expect_tag(reader, buf, "request");
         expect_opening_tag(reader, buf, "reply");
@@ -41,20 +56,69 @@ impl TextSource for Scaife {
         expect_opening_tag(reader, buf, "TEI");
         expect_opening_tag(reader, buf, "text");
         expect_opening_tag(reader, buf, "body");
+    }
 
-        let starting_div = read_starting_div(reader, buf).to_owned();
-        reader.trim_text(false);
-        let text = read_text(reader, buf, starting_div);
-        reader.trim_text(true);
-
+    fn close(&self, reader: &mut quick_xml::Reader<&[u8]>, buf: &mut Vec<u8>) {
         expect_closing_tag(reader, buf, "body");
         expect_closing_tag(reader, buf, "text");
         expect_closing_tag(reader, buf, "TEI");
         expect_closing_tag(reader, buf, "passage");
         expect_closing_tag(reader, buf, "reply");
         expect_closing_tag(reader, buf, "GetPassage");
-
         expect_eof(reader, buf);
+    }
+
+    fn text(&self) -> &str {
+        &self.text
+    }
+}
+
+pub struct Scaife {}
+
+impl Scaife {
+    fn text_url(id: &str) -> String {
+        format!("https://scaife.perseus.org/library/{}/cts-api-xml", id)
+    }
+
+    fn id_to_source(&self, id: &str) -> Result<Box<dyn ScaifeSource>, GetTextError> {
+        Ok(if id.starts_with("urn") {
+            Box::new(ScaifeUrn {
+                text: ureq::get(&Self::text_url(id))
+                    .call()
+                    .map_err(|_| GetTextError::ConnectionError)?
+                    .into_string()
+                    .map_err(|_| GetTextError::EncodingError)?,
+            })
+        } else if let Some(path) = id.strip_prefix("file:") {
+            Box::new(ScaifeFile {
+                text: std::fs::read_to_string(std::path::Path::new(path))
+                    .map_err(|_| GetTextError::FileSystemError)?,
+            })
+        } else {
+            panic!("Invalid Scaife identifier prefix")
+        })
+    }
+}
+
+impl TextSource for Scaife {
+    fn get_text(&self, id: &str) -> GetTextResult {
+        let source = self.id_to_source(id)?;
+
+        let mut out = std::fs::File::create("debug.xml").unwrap();
+        std::io::Write::write_all(&mut out, source.text().as_bytes()).unwrap();
+
+        let reader = &mut quick_xml::Reader::from_str(source.text());
+        reader.trim_text(true);
+        let buf = &mut Vec::new();
+
+        source.open(reader, buf);
+
+        let starting_div = read_starting_div(reader, buf).to_owned();
+        reader.trim_text(false);
+        let text = read_text(reader, buf, starting_div);
+        reader.trim_text(true);
+
+        source.close(reader, buf);
 
         Ok(text)
     }
@@ -79,6 +143,20 @@ fn skip_expect_tag(reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>, tag_name: &str
         .read_to_end(bytes_start.name())
         .map_err(|e| panic!("Could not read the whole <{tag_name}> tag, got error: {e}"))
         .unwrap();
+}
+
+fn skip_expect_decl(reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>) {
+    let ev = reader.read_event_into(buf);
+    if !matches!(ev, Ok(Event::Decl(_))) {
+        panic!("Expected XML declaration, found {ev:?}")
+    };
+}
+
+fn skip_expect_pi(reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>) {
+    let ev = reader.read_event_into(buf);
+    if !matches!(ev, Ok(Event::PI(_))) {
+        panic!("Expected XML processing instruction, found {ev:?}")
+    };
 }
 
 fn expect_closing_tag<'a>(reader: &mut Reader<&[u8]>, buf: &'a mut Vec<u8>, tag_name: &str) {

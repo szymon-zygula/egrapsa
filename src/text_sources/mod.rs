@@ -9,6 +9,8 @@ pub enum GetTextError {
     EncodingError,
     #[error("the data downloaded from the text source could not be parsed")]
     ParseError,
+    #[error("the file could not be opened")]
+    FileSystemError,
 }
 
 type GetTextResult = Result<TextParent, GetTextError>;

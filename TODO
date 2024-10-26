@@ -2,7 +2,6 @@ BEFORE PRINTING:
 
 SECONDARY:
 Font selection.
-Cache downloaded files
 Refactor TextNodeKind, formatting selection, generation in scaife etc. (so that it's not everywhere?).
 Use long s option
 Use old ligatures option
