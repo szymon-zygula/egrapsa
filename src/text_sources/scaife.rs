@@ -90,6 +90,7 @@ impl Scaife {
                     .map_err(|_| GetTextError::EncodingError)?,
             })
         } else if let Some(path) = id.strip_prefix("file:") {
+            println!("Path: {path}");
             Box::new(ScaifeFile {
                 text: std::fs::read_to_string(std::path::Path::new(path))
                     .map_err(|_| GetTextError::FileSystemError)?,
@@ -184,11 +185,11 @@ fn read_text(reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>, start_tag: BytesStar
     let mut name: Option<Box<dyn TextNode>> = None;
     loop {
         match reader.read_event_into(buf) {
-            Ok(Event::Start(tag)) => match name_to_str(&tag.name()) {
+            Ok(Event::Start(tag)) => match name_to_str(&tag.name()).to_lowercase().as_str() {
                 "p" | "div" | "del" | "foreign" | "label" | "q" | "title" | "quote" | "l"
                 | "cit" | "said" | "add" | "corr" | "num" | "sp" | "speaker" | "sic" | "reg"
                 | "ref" | "date" | "app" | "lem" | "choice" | "abbr" | "ex" | "expan" | "desc"
-                | "persName" => {
+                | "persname" | "name" | "placename" | "rs" | "term" | "emph" => {
                     let tag = tag.to_owned();
                     let text = read_text(reader, buf, tag);
                     subtexts.push(Box::new(text));
@@ -343,11 +344,16 @@ fn get_text_kind(tag: &BytesStart) -> TextNodeKind {
         "speaker" => TextNodeKind::Speaker,
         "num" => TextNodeKind::Symbol,
         "corr" => TextNodeKind::Corrected,
+        "name" => TextNodeKind::Name,
+        "rs" => TextNodeKind::ReferencingString,
         "desc" => TextNodeKind::Description,
         "l" => TextNodeKind::Line,
         "label" => TextNodeKind::Label,
         "title" => TextNodeKind::Italics,
         "persname" => TextNodeKind::PersonName,
+        "placename" => TextNodeKind::PlaceName,
+        "term" => TextNodeKind::TechnicalTerm,
+        "emph" => TextNodeKind::Emphasis,
         "hi" => TextNodeKind::Highlight,
         "p" | "said" => TextNodeKind::Paragraph,
         "gap" | "note" | "bibl" => TextNodeKind::Note,

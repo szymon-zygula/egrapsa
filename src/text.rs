@@ -44,11 +44,15 @@ pub enum TextNodeKind {
     BlockQuote,
     Sic,
     Italics,
+    Emphasis,
     PersonName,
+    PlaceName,
     Line,
     Simple,
     Corrected,
+    Name,
     Symbol,
+    TechnicalTerm,
     Speaker,
     DialogueEntry,
     Regularized,
@@ -62,6 +66,7 @@ pub enum TextNodeKind {
     Expanded,
     Expandable,
     Description,
+    ReferencingString,
 }
 
 #[derive(Debug)]
@@ -116,6 +121,7 @@ impl TextNode for TextParent {
                 // Title etc. are taken from input parameters
             }
             TextNodeKind::Chapter => {}
+            TextNodeKind::TechnicalTerm => {}
             TextNodeKind::Lemma => {}
             TextNodeKind::Section => {
                 let prename = match config.language {
@@ -166,6 +172,7 @@ impl TextNode for TextParent {
             TextNodeKind::Highlight => {}
             TextNodeKind::Deleted => {}
             TextNodeKind::Corrected => {}
+            TextNodeKind::Name => {}
             TextNodeKind::Label => {
                 let mut text = String::from(r"\textbf{");
                 text.push_str(&formatted);
@@ -179,13 +186,15 @@ impl TextNode for TextParent {
                 text.push_str(r"\end{displayquote}");
                 formatted = text;
             }
-            TextNodeKind::Italics => {
+            TextNodeKind::Emphasis | TextNodeKind::Italics => {
                 let mut text = String::from(r"\textit{");
                 text.push_str(&formatted);
                 text.push_str("}");
                 formatted = text;
             }
             TextNodeKind::PersonName => {}
+            TextNodeKind::PlaceName => {}
+            TextNodeKind::ReferencingString => {}
             TextNodeKind::Line => {
                 formatted.push_str("\n\\\\");
             }
