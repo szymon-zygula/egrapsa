@@ -2,8 +2,7 @@ BEFORE PRINTING:
 
 SECONDARY:
 Font selection.
-Refactor TextNodeKind, formatting selection, generation in scaife etc. (so that it's not everywhere?).
 Use long s option
 Use old ligatures option
+Refactor TextNodeKind, formatting selection, generation in scaife etc. (so that it's not everywhere?).
 Refactor LaTeX formatting (string hell)
-fix \Needsspace being put between marginpar and speaker (e.g. Βίων Πρᾶσις)

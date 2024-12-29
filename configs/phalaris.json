@@ -5,7 +5,7 @@
         "title": "Phalaris",
         "author": "Lucianus Samosatensis",
         "catchwords": false,
-        "margin_notes": true,
+        "ref_numbers": true,
         "footnotes": false,
         "language": "Greek"
     },

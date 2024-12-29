@@ -5,8 +5,8 @@
         "title": "Opera Omnia",
         "author": "Lucianus Samosatensis",
         "catchwords": false,
-        "margin_notes": false,
-        "footnotes": false,
+        "ref_numbers": true,
+        "footnotes": true,
         "language": "Greek"
     },
     "source_type": "Scaife",

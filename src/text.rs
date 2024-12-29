@@ -248,7 +248,7 @@ impl TextNode for ParagraphNumber {
     }
 
     fn format_for_latex(&self, config: &FormatterConfig) -> String {
-        let mut text = String::from(r"\alignedmarginpar{");
+        let mut text = String::from(r"\refnumber{");
         text.push_str(&self.0.format_for_latex(config));
         text.push_str("}");
         text
@@ -264,7 +264,7 @@ impl TextNode for LineNumber {
     }
 
     fn format_for_latex(&self, config: &FormatterConfig) -> String {
-        let mut text = String::from(r"\alignedmarginpar{");
+        let mut text = String::from(r"\refnumber{");
         text.push_str(&self.0.format_for_latex(config));
         text.push_str("}");
         text
@@ -280,7 +280,7 @@ impl TextNode for MarginNote {
     }
 
     fn format_for_latex(&self, config: &FormatterConfig) -> String {
-        let mut text = String::from(r"\alignedmarginpar{");
+        let mut text = String::from(r"\refnumber{");
         text.push_str(&self.0.format_for_latex(config));
         text.push_str("}");
         text
@@ -310,7 +310,7 @@ impl TextNode for Milestone {
         }
 
         if let Some(number) = &self.number {
-            let mut text = String::from(r"\alignedmarginpar{");
+            let mut text = String::from(r"\refnumber{");
             text.push_str(&number.format_for_latex(config));
             text.push_str("}");
             text

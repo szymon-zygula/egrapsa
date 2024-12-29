@@ -34,9 +34,9 @@ impl Latex {
     // Replace some characters not likely to be found in fonts
     fn normalize(mut text: String) -> String {
         text = text.replace("ↄ", r"\rotatebox[origin=c]{180}{c}"); // Roman numeral ↄ
-        let marginpar_regex = Regex::new(r" \\alignedmarginpar\{(.*)\} ").unwrap();
+        let marginpar_regex = Regex::new(r" \\refnumber\{(.*)\} ").unwrap();
         marginpar_regex
-            .replace_all(&text, "\\alignedmarginpar{$1}")
+            .replace_all(&text, "\\refnumber{$1}")
             .to_string()
     }
 }
@@ -55,7 +55,7 @@ impl TextFormatter for Latex {
     }
 
     fn set_margin_notes(&mut self, margin_notes: bool) {
-        self.config.margin_notes = margin_notes;
+        self.config.ref_numbers = margin_notes;
     }
 
     fn set_footnotes(&mut self, footnotes: bool) {
@@ -128,23 +128,16 @@ impl TextFormatter for Latex {
 \usepackage{sectsty}
 \allsectionsfont{\centering}
 
-\newcommand{\alignedmarginpar}[1]{%",
+\newcommand{\refnumber}[1]{",
         );
 
-        if self.config.margin_notes {
+        if self.config.ref_numbers {
             text.push_str(
-                r"
-    \hspace{0pt}\Ifthispageodd{%
-        \marginpar{\raggedright\vspace{-0.5em}\scriptsize\color{gray} #1}
-    }{%
-        \marginpar{\raggedleft\vspace{-0.5em}\scriptsize\color{gray} #1}
-    }%",
+                r" {\scriptsize\color{gray}(#1)} ",
             );
         }
 
-        text.push_str(
-            r"
-}
+        text.push_str(r"}
 
 \date{}
 

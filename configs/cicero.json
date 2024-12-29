@@ -5,8 +5,8 @@
         "title": "Orationes",
         "author": "Marcus Tulius Cicero",
         "catchwords": false,
-        "margin_notes": true,
-        "footnotes": false,
+        "ref_numbers": true,
+        "footnotes": true,
         "language": "Latin"
     },
     "source_type": "Scaife",

@@ -5,7 +5,7 @@
         "title": "Opera Omnia",
         "author": "Lucianus Samosatensis",
         "catchwords": false,
-        "margin_notes": true,
+        "ref_numbers": true,
         "footnotes": true,
         "language": "Greek"
     },
