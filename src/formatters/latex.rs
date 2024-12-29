@@ -101,6 +101,7 @@ impl TextFormatter for Latex {
             r"
 \usepackage{fontspec}
 \usepackage{tocloft}
+\usepackage[perpage]{footmisc}
 
 % Show paragraphs in ToC (actually not used for paragraphs but for chapters)
 \setcounter{tocdepth}{4}
