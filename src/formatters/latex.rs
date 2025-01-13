@@ -283,7 +283,7 @@ impl TextFormatter for Latex {
             if let Some(alt_title) = &work.alt_title {
                 text.push_str(&format!(
                     r"
-\addtocontents{{toc}}{{\protect\vskip-10pt}}
+\addtocontents{{toc}}{{\protect\vskip-10pt\needspace{{2\baselineskip}}}}
 \addtocontents{{toc}}{{\protect\contentsline{{chapter}}{{{}}}{{}}{{}}}}
 \addcontentsline{{toc}}{{paragraph}}{{\textbf{{({})}}}}
 ",
@@ -344,8 +344,9 @@ impl TextFormatter for Latex {
 }{%
     \clearpage\null\thispagestyle{empty}
 }%
-\renewcommand{\contentsname}{Index}
+\renewcommand{\contentsname}{Index.}
 \setlength{\cftparaindent}{0pt}
+\renewcommand{\versohead}{Index.}
 \tableofcontents
 \vspace{1cm}
 \textbf{FINIS TABULÆ.}
