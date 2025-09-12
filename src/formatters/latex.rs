@@ -1,4 +1,4 @@
-use super::{Language, TextFormatter, Work};
+use super::{Language, TextFormatter, Typography, Work};
 use crate::config::FormatterConfig;
 use crate::text::*;
 use regex::Regex;
@@ -16,17 +16,37 @@ impl Latex {
         }
     }
 
-    fn get_language_packages(&self) -> &str {
+    pub fn get_language_packages(&self) -> String {
         match self.config.language {
             Language::Latin => {
-                r"
-\usepackage[latin]{babel}
-\usepackage[oldstyle, veryoldstyle]{kpfonts}"
+                let kpfonts_options = match self.config.typography {
+                    Typography::Modern => "",
+                    Typography::Old => "oldstyle",
+                    Typography::VeryOld => "oldstyle, veryoldstyle",
+                };
+                
+                if kpfonts_options.is_empty() {
+                    format!(
+                        r"
+\usepackage[latin]{{babel}}
+\usepackage{{kpfonts}}"
+                    )
+                } else {
+                    format!(
+                        r"
+\usepackage[latin]{{babel}}
+\usepackage[{}]{{kpfonts}}", 
+                        kpfonts_options
+                    )
+                }
             }
             Language::Greek => {
-                r"
+                // For Greek, typography setting doesn't affect the package choice for now
+                String::from(
+                    r"
 \usepackage[greek.polutoniko]{babel}
 \usepackage{TheanoOldStyle}"
+                )
             }
         }
     }
@@ -76,6 +96,10 @@ impl TextFormatter for Latex {
         self.config.language = language;
     }
 
+    fn set_typography(&mut self, typography: Typography) {
+        self.config.typography = typography;
+    }
+
     fn format(&self) -> String {
         let mut text = String::from(
             r"
@@ -92,7 +116,7 @@ impl TextFormatter for Latex {
 
 \usepackage[utf8]{inputenc}",
         );
-        text.push_str(self.get_language_packages());
+        text.push_str(&self.get_language_packages());
         if self.config.catchwords {
             text.push_str("\\usepackage{fwlw}");
         }
@@ -359,7 +383,7 @@ impl TextFormatter for Latex {
 #[cfg(test)]
 mod tests {
     use crate::{
-        formatters::{latex::Latex, Language, TextFormatter, Work},
+        formatters::{latex::Latex, Language, TextFormatter, Typography, Work},
         text::{Footnote, TextNode, TextNodeKind, TextParent},
     };
 
@@ -401,6 +425,7 @@ mod tests {
         formatter.set_margin_notes(false);
         formatter.set_footnotes(true);
         formatter.set_language(Language::Latin);
+        formatter.set_typography(Typography::VeryOld);
         formatter.add_work(work);
 
         let output = formatter.format();
@@ -458,6 +483,85 @@ mod tests {
             output.contains(r"usepackage[latin]{babel}")
                 || output.contains("usepackage[latin]{babel}"),
             "Missing Latin babel package (language packages section):\n{output}"
+        );
+    }
+
+    #[test]
+    fn typography_modern_uses_no_kpfonts_options() {
+        let mut formatter = Latex::new();
+        formatter.set_language(Language::Latin);
+        formatter.set_typography(Typography::Modern);
+        
+        let packages = formatter.get_language_packages();
+        
+        // Should contain kpfonts without options
+        assert!(
+            packages.contains(r"\usepackage{kpfonts}") && !packages.contains("[oldstyle"),
+            "Modern typography should use kpfonts without oldstyle options:\n{packages}"
+        );
+        assert!(
+            packages.contains(r"\usepackage[latin]{babel}"),
+            "Should include babel package:\n{packages}"
+        );
+    }
+
+    #[test]
+    fn typography_old_uses_oldstyle_option() {
+        let mut formatter = Latex::new();
+        formatter.set_language(Language::Latin);
+        formatter.set_typography(Typography::Old);
+        
+        let packages = formatter.get_language_packages();
+        
+        // Should contain kpfonts with oldstyle option but not veryoldstyle
+        assert!(
+            packages.contains(r"\usepackage[oldstyle]{kpfonts}") && !packages.contains("veryoldstyle"),
+            "Old typography should use kpfonts with oldstyle option only:\n{packages}"
+        );
+        assert!(
+            packages.contains(r"\usepackage[latin]{babel}"),
+            "Should include babel package:\n{packages}"
+        );
+    }
+
+    #[test]
+    fn typography_very_old_uses_both_options() {
+        let mut formatter = Latex::new();
+        formatter.set_language(Language::Latin);
+        formatter.set_typography(Typography::VeryOld);
+        
+        let packages = formatter.get_language_packages();
+        
+        // Should contain kpfonts with both oldstyle and veryoldstyle options
+        assert!(
+            packages.contains(r"\usepackage[oldstyle, veryoldstyle]{kpfonts}"),
+            "VeryOld typography should use kpfonts with both oldstyle and veryoldstyle options:\n{packages}"
+        );
+        assert!(
+            packages.contains(r"\usepackage[latin]{babel}"),
+            "Should include babel package:\n{packages}"
+        );
+    }
+
+    #[test]
+    fn typography_does_not_affect_greek_packages() {
+        let mut formatter = Latex::new();
+        formatter.set_language(Language::Greek);
+        formatter.set_typography(Typography::Modern);
+        
+        let packages_modern = formatter.get_language_packages();
+        
+        formatter.set_typography(Typography::VeryOld);
+        let packages_very_old = formatter.get_language_packages();
+        
+        // Greek packages should be identical regardless of typography setting
+        assert_eq!(
+            packages_modern, packages_very_old,
+            "Typography setting should not affect Greek package selection"
+        );
+        assert!(
+            packages_modern.contains(r"\usepackage{TheanoOldStyle}"),
+            "Greek should use TheanoOldStyle package:\n{packages_modern}"
         );
     }
 }
