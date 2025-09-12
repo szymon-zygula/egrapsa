@@ -133,9 +133,7 @@ impl TextFormatter for Latex {
         );
 
         if self.config.ref_numbers {
-            text.push_str(
-                r" {\scriptsize\color{gray}(#1)} ",
-            );
+            text.push_str(r" {\scriptsize\color{gray}(#1)} ");
         }
 
         text.push_str(r"}
@@ -355,5 +353,111 @@ impl TextFormatter for Latex {
         text.push_str(r"\end{document}");
 
         Self::normalize(text)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::{
+        formatters::{latex::Latex, Language, TextFormatter, Work},
+        text::{Footnote, TextNode, TextNodeKind, TextParent},
+    };
+
+    fn make_paragraph(texts: Vec<Box<dyn TextNode>>) -> TextParent {
+        TextParent {
+            name: None,
+            kind: TextNodeKind::Paragraph,
+            subtexts: texts,
+        }
+    }
+
+    fn make_section(subtexts: Vec<Box<dyn TextNode>>) -> TextParent {
+        TextParent {
+            name: None,
+            kind: TextNodeKind::Section,
+            subtexts,
+        }
+    }
+
+    #[test]
+    fn formats_basic_chapter_with_section_and_footnote() {
+        // Build a small text tree: Section -> Paragraph -> (String + Footnote)
+        let paragraph = make_paragraph(vec![
+            Box::new(String::from("et homo ae")), // tests ligatures & start-of-line 'et' preservation
+            Box::new(Footnote(String::from("lost"))), // tests footnote emission
+        ]);
+        let section = make_section(vec![Box::new(paragraph)]);
+
+        let work = Work {
+            title: "WORKTITLE".into(),
+            alt_title: Some("ALT".into()),
+            text: section,
+        };
+
+        let mut formatter = Latex::new();
+        formatter.set_title(Some("My Title".into()));
+        formatter.set_author(Some("Author".into()));
+        formatter.set_catchwords(false);
+        formatter.set_margin_notes(false);
+        formatter.set_footnotes(true);
+        formatter.set_language(Language::Latin);
+        formatter.add_work(work);
+
+        let output = formatter.format();
+
+        // Core document metadata
+        assert!(
+            output.contains(r"\\title{My Title}") || output.contains("\\title{My Title}"),
+            "Missing title block:\n{output}"
+        );
+        assert!(
+            output.contains(r"\\author{Author}") || output.contains("\\author{Author}"),
+            "Missing author block:\n{output}"
+        );
+
+        // Chapter + alt title handling
+        assert!(
+            output.contains(r"\\chapter*{WORKTITLE.}") || output.contains("\\chapter*{WORKTITLE.}"),
+            "Missing chapter heading:\n{output}"
+        );
+        assert!(
+            output.contains(r"\\textbf{(ALT)}") || output.contains("\\textbf{(ALT)}"),
+            "Missing alt title ToC entry:\n{output}"
+        );
+        assert!(
+            output.contains(r"\\likechapter{\\altchapter.}")
+                || output.contains("\\likechapter{\\altchapter.}"),
+            "Missing likechapter rendering for alt title:\n{output}"
+        );
+
+        // Section heading (Latin variant)
+        assert!(
+            output.contains(r"\\section*{Liber \\Roman{section}.}")
+                || output.contains("\\section*{Liber \\Roman{section}.}"),
+            "Missing section heading (Latin):\n{output}"
+        );
+
+        // Text normalization & ligatures
+        assert!(
+            output.contains("et homo æ"),
+            "Ligature or word replacement failed:\n{output}"
+        );
+        assert!(
+            output.contains("et homo"),
+            "Initial 'et' should not be replaced globally:\n{output}"
+        );
+
+        // Footnote emission
+        assert!(
+            output.contains(r"\\footnote{lost.") || output.contains("\\footnote{lost."),
+            "Footnote not rendered or malformed:\n{output}"
+        );
+
+        // Language-specific package (Latin)
+        assert!(
+            output.contains(r"usepackage[latin]{babel}")
+                || output.contains("usepackage[latin]{babel}"),
+            "Missing Latin babel package (language packages section):\n{output}"
+        );
     }
 }

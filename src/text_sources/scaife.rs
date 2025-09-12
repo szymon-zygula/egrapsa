@@ -75,6 +75,24 @@ impl ScaifeSource for ScaifeUrn {
 
 pub struct Scaife {}
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::text::TextNode;
+
+    #[test]
+    fn parses_minimal_file_source() {
+        let xml = r#"<?xml version="1.0"?><?proc instruct?><TEI><teiHeader></teiHeader><text><body><div type="edition"><div type="textpart" subtype="book"><div type="textpart" subtype="section"><p>et</p></div></div></div></body></text></TEI>"#;
+        let path = "tests/fixtures/minimal_inline.xml";
+        std::fs::create_dir_all("tests/fixtures").unwrap();
+        std::fs::write(path, xml).unwrap();
+        let scaife = Scaife {};
+        let text = scaife.get_text(&format!("file:{path}")).expect("parse ok");
+        let rendered = text.to_string();
+        assert!(rendered.contains("et"));
+    }
+}
+
 impl Scaife {
     fn text_url(id: &str) -> String {
         format!("https://scaife.perseus.org/library/{}/cts-api-xml", id)

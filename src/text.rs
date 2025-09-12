@@ -474,3 +474,26 @@ fn normalize_text(mut text: String) -> String {
     text = replace_ae_oe(text);
     text
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn replaces_et_and_ligatures_but_preserves_leading_et() {
+        let input = String::from("et et etc ae oe Ae OE");
+        let output = input.format_for_latex(&FormatterConfig::default());
+        assert!(output.starts_with("et \\& \\&c"), "Unexpected output start: {output}");
+        assert!(output.contains("æ"));
+        assert!(output.contains("œ"));
+        assert!(output.contains("Æ"));
+        assert!(output.contains("Œ"));
+    }
+
+    #[test]
+    fn does_not_replace_inside_words() {
+        let input = String::from("etiam et.");
+        let output = input.format_for_latex(&FormatterConfig::default());
+        assert!(output.contains("etiam \\&."), "Output was: {output}");
+    }
+}
