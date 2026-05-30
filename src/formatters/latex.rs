@@ -29,7 +29,6 @@ impl Latex {
 \usepackage{TheanoOldStyle}"
             }
         }
-
     }
 
     // Replace some characters not likely to be found in fonts
