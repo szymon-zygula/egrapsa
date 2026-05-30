@@ -114,7 +114,7 @@ impl TextNode for TextParent {
             TextNodeKind::Symbol => {
                 let mut text = String::from(r"\textit{");
                 text.push_str(&formatted);
-                text.push_str("}");
+                text.push('}');
                 formatted = text;
             }
             TextNodeKind::Book => {
@@ -136,7 +136,7 @@ impl TextNode for TextParent {
                     full_name = format!("{prename}. {name}");
                     full_name_nl = format!(r"{prename}.\\{name}");
                 } else {
-                    full_name = format!("{prename}");
+                    full_name = prename.to_owned();
                     full_name_nl = full_name.clone();
                 };
 
@@ -189,7 +189,7 @@ impl TextNode for TextParent {
             TextNodeKind::Emphasis | TextNodeKind::Italics => {
                 let mut text = String::from(r"\textit{");
                 text.push_str(&formatted);
-                text.push_str("}");
+                text.push('}');
                 formatted = text;
             }
             TextNodeKind::PersonName => {}
@@ -250,7 +250,7 @@ impl TextNode for ParagraphNumber {
     fn format_for_latex(&self, config: &FormatterConfig) -> String {
         let mut text = String::from(r"\refnumber{");
         text.push_str(&self.0.format_for_latex(config));
-        text.push_str("}");
+        text.push('}');
         text
     }
 }
@@ -266,7 +266,7 @@ impl TextNode for LineNumber {
     fn format_for_latex(&self, config: &FormatterConfig) -> String {
         let mut text = String::from(r"\refnumber{");
         text.push_str(&self.0.format_for_latex(config));
-        text.push_str("}");
+        text.push('}');
         text
     }
 }
@@ -282,7 +282,7 @@ impl TextNode for MarginNote {
     fn format_for_latex(&self, config: &FormatterConfig) -> String {
         let mut text = String::from(r"\refnumber{");
         text.push_str(&self.0.format_for_latex(config));
-        text.push_str("}");
+        text.push('}');
         text
     }
 }
@@ -312,7 +312,7 @@ impl TextNode for Milestone {
         if let Some(number) = &self.number {
             let mut text = String::from(r"\refnumber{");
             text.push_str(&number.format_for_latex(config));
-            text.push_str("}");
+            text.push('}');
             text
         } else {
             String::new()
@@ -362,7 +362,7 @@ impl TextNode for Gap {
     fn to_string(&self) -> String {
         format!(
             "{} [{}]",
-            self.rend.as_ref().map(|x| x.as_str()).unwrap_or("[\\dots]"),
+            self.rend.as_deref().unwrap_or("[\\dots]"),
             translate_gap_reason(&self.reason)
         )
     }
@@ -370,7 +370,7 @@ impl TextNode for Gap {
     fn format_for_latex(&self, config: &FormatterConfig) -> String {
         format!(
             "{}\\footnote{{{}}} ",
-            self.rend.as_ref().map(|x| x.as_str()).unwrap_or("[\\dots]"),
+            self.rend.as_deref().unwrap_or("[\\dots]"),
             ensure_dot(translate_gap_reason(&self.reason.format_for_latex(config)))
         )
     }
@@ -509,8 +509,10 @@ mod tests {
 
     #[test]
     fn footnote_emission_and_dot() {
-        let mut cfg = FormatterConfig::default();
-        cfg.footnotes = true;
+        let cfg = FormatterConfig {
+            footnotes: true,
+            ..FormatterConfig::default()
+        };
         let f1 = Footnote("lorem".into()).format_for_latex(&cfg);
         let f2 = Footnote("ipsum.".into()).format_for_latex(&cfg);
         // Current implementation omits the extra space before the closing brace inside footnote
@@ -520,8 +522,10 @@ mod tests {
 
     #[test]
     fn gap_translation_and_rend() {
-        let mut cfg = FormatterConfig::default();
-        cfg.footnotes = true; // gap always emits a footnote regardless, but keep consistent
+        let cfg = FormatterConfig {
+            footnotes: true, // gap always emits a footnote regardless, but keep consistent
+            ..FormatterConfig::default()
+        };
         let g1 = Gap {
             reason: "lost".into(),
             rend: None,
@@ -570,7 +574,7 @@ mod tests {
     fn escape_special_chars_idempotent() {
         let input = String::from("#&_\\text");
         let once = input.format_for_latex(&FormatterConfig::default());
-        let twice = once.format_for_latex(&FormatterConfig::default());
+        let _twice = once.format_for_latex(&FormatterConfig::default());
         // Current implementation re-escapes already escaped sequences (not idempotent). Just assert first pass shape.
         assert!(once.contains("\\#"));
         assert!(once.contains("\\&"));
@@ -590,8 +594,10 @@ mod tests {
     #[test]
     fn greek_section_formatting() {
         use crate::formatters::Language;
-        let mut cfg = FormatterConfig::default();
-        cfg.language = Language::Greek;
+        let cfg = FormatterConfig {
+            language: Language::Greek,
+            ..FormatterConfig::default()
+        };
         let section = TextParent {
             name: None,
             kind: TextNodeKind::Section,

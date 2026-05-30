@@ -29,6 +29,7 @@ impl Latex {
 \usepackage{TheanoOldStyle}"
             }
         }
+
     }
 
     // Replace some characters not likely to be found in fonts
@@ -38,6 +39,12 @@ impl Latex {
         marginpar_regex
             .replace_all(&text, "\\refnumber{$1}")
             .to_string()
+    }
+}
+
+impl Default for Latex {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -237,18 +244,18 @@ impl TextFormatter for Latex {
 ",
             );
         }
-        text.push_str("}");
+        text.push('}');
 
         if let Some(author) = self.config.author.as_ref() {
             text.push_str(r"\author{");
-            text.push_str(&author);
-            text.push_str(r"}");
+            text.push_str(author);
+            text.push('}');
         }
 
         if let Some(title) = self.config.title.as_ref() {
             text.push_str(r"\title{");
-            text.push_str(&title);
-            text.push_str(r"}");
+            text.push_str(title);
+            text.push('}');
         }
 
         text.push_str(
