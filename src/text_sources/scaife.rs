@@ -24,6 +24,7 @@ impl ScaifeSource for ScaifeFile {
     fn open(&self, reader: &mut quick_xml::Reader<&[u8]>, buf: &mut Vec<u8>) {
         skip_expect_decl(reader, buf);
         skip_expect_pi(reader, buf);
+        skip_expect_pi(reader, buf);
         expect_opening_tag(reader, buf, "TEI");
         skip_expect_tag(reader, buf, "teiHeader");
         expect_opening_tag(reader, buf, "text");
@@ -301,7 +302,7 @@ fn read_empty_tag(tag: &BytesStart) -> Box<dyn TextNode> {
         // Sometimes <X /> appears for not reason,
         // where X should never be an empty tag.
         // Seems to be some junk.
-        "l" | "p" => Box::new(""),
+        "l" | "p" | "sic" => Box::new(""),
         "pb" => {
             if let Some(x) = get_attr_val_opt(&tag, "n") {
                 Box::new(ParagraphNumber(x))
