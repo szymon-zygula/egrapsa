@@ -114,7 +114,7 @@ impl TextNode for TextParent {
             TextNodeKind::Symbol => {
                 let mut text = String::from(r"\textit{");
                 text.push_str(&formatted);
-                text.push_str("}");
+                text.push('}');
                 formatted = text;
             }
             TextNodeKind::Book => {
@@ -136,7 +136,7 @@ impl TextNode for TextParent {
                     full_name = format!("{prename}. {name}");
                     full_name_nl = format!(r"{prename}.\\{name}");
                 } else {
-                    full_name = format!("{prename}");
+                    full_name = prename.to_owned();
                     full_name_nl = full_name.clone();
                 };
 
@@ -189,7 +189,7 @@ impl TextNode for TextParent {
             TextNodeKind::Emphasis | TextNodeKind::Italics => {
                 let mut text = String::from(r"\textit{");
                 text.push_str(&formatted);
-                text.push_str("}");
+                text.push('}');
                 formatted = text;
             }
             TextNodeKind::PersonName => {}
@@ -211,7 +211,7 @@ impl TextNode for TextParent {
     }
 }
 
-fn ensure_dot(str: &str) -> Cow<str> {
+fn ensure_dot(str: &str) -> Cow<'_, str> {
     if str.ends_with('.') || str.ends_with(". ") {
         Cow::Borrowed(str)
     } else {
@@ -250,7 +250,7 @@ impl TextNode for ParagraphNumber {
     fn format_for_latex(&self, config: &FormatterConfig) -> String {
         let mut text = String::from(r"\refnumber{");
         text.push_str(&self.0.format_for_latex(config));
-        text.push_str("}");
+        text.push('}');
         text
     }
 }
@@ -266,7 +266,7 @@ impl TextNode for LineNumber {
     fn format_for_latex(&self, config: &FormatterConfig) -> String {
         let mut text = String::from(r"\refnumber{");
         text.push_str(&self.0.format_for_latex(config));
-        text.push_str("}");
+        text.push('}');
         text
     }
 }
@@ -282,7 +282,7 @@ impl TextNode for MarginNote {
     fn format_for_latex(&self, config: &FormatterConfig) -> String {
         let mut text = String::from(r"\refnumber{");
         text.push_str(&self.0.format_for_latex(config));
-        text.push_str("}");
+        text.push('}');
         text
     }
 }
@@ -312,7 +312,7 @@ impl TextNode for Milestone {
         if let Some(number) = &self.number {
             let mut text = String::from(r"\refnumber{");
             text.push_str(&number.format_for_latex(config));
-            text.push_str("}");
+            text.push('}');
             text
         } else {
             String::new()
@@ -362,7 +362,7 @@ impl TextNode for Gap {
     fn to_string(&self) -> String {
         format!(
             "{} [{}]",
-            self.rend.as_ref().map(|x| x.as_str()).unwrap_or("[\\dots]"),
+            self.rend.as_deref().unwrap_or("[\\dots]"),
             translate_gap_reason(&self.reason)
         )
     }
@@ -370,7 +370,7 @@ impl TextNode for Gap {
     fn format_for_latex(&self, config: &FormatterConfig) -> String {
         format!(
             "{}\\footnote{{{}}} ",
-            self.rend.as_ref().map(|x| x.as_str()).unwrap_or("[\\dots]"),
+            self.rend.as_deref().unwrap_or("[\\dots]"),
             ensure_dot(translate_gap_reason(&self.reason.format_for_latex(config)))
         )
     }
@@ -483,7 +483,10 @@ mod tests {
     fn replaces_et_and_ligatures_but_preserves_leading_et() {
         let input = String::from("et et etc ae oe Ae OE");
         let output = input.format_for_latex(&FormatterConfig::default());
-        assert!(output.starts_with("et \\& \\&c"), "Unexpected output start: {output}");
+        assert!(
+            output.starts_with("et \\& \\&c"),
+            "Unexpected output start: {output}"
+        );
         assert!(output.contains("æ"));
         assert!(output.contains("œ"));
         assert!(output.contains("Æ"));
@@ -506,8 +509,10 @@ mod tests {
 
     #[test]
     fn footnote_emission_and_dot() {
-        let mut cfg = FormatterConfig::default();
-        cfg.footnotes = true;
+        let cfg = FormatterConfig {
+            footnotes: true,
+            ..FormatterConfig::default()
+        };
         let f1 = Footnote("lorem".into()).format_for_latex(&cfg);
         let f2 = Footnote("ipsum.".into()).format_for_latex(&cfg);
         // Current implementation omits the extra space before the closing brace inside footnote
@@ -517,11 +522,21 @@ mod tests {
 
     #[test]
     fn gap_translation_and_rend() {
-        let mut cfg = FormatterConfig::default();
-        cfg.footnotes = true; // gap always emits a footnote regardless, but keep consistent
-        let g1 = Gap { reason: "lost".into(), rend: None }.format_for_latex(&cfg);
+        let cfg = FormatterConfig {
+            footnotes: true, // gap always emits a footnote regardless, but keep consistent
+            ..FormatterConfig::default()
+        };
+        let g1 = Gap {
+            reason: "lost".into(),
+            rend: None,
+        }
+        .format_for_latex(&cfg);
         assert!(g1.contains("lacuna."), "Expected lacuna in {g1}");
-        let g2 = Gap { reason: "missing".into(), rend: Some("[om.]".into()) }.format_for_latex(&cfg);
+        let g2 = Gap {
+            reason: "missing".into(),
+            rend: Some("[om.]".into()),
+        }
+        .format_for_latex(&cfg);
         assert!(g2.starts_with("[om.]"));
         assert!(g2.contains("missing."));
     }
@@ -531,7 +546,10 @@ mod tests {
         let input = String::from("et, et. et; etiam et? etc: sete etset et");
         let output = input.format_for_latex(&FormatterConfig::default());
         // First token at start unchanged, later standalone tokens replaced
-        assert!(output.starts_with("et, "), "First token unexpectedly replaced: {output}");
+        assert!(
+            output.starts_with("et, "),
+            "First token unexpectedly replaced: {output}"
+        );
         assert!(output.contains(" \\&."));
         assert!(output.contains(" \\&;"));
         assert!(output.contains(" \\&?"));
@@ -556,7 +574,7 @@ mod tests {
     fn escape_special_chars_idempotent() {
         let input = String::from("#&_\\text");
         let once = input.format_for_latex(&FormatterConfig::default());
-        let twice = once.format_for_latex(&FormatterConfig::default());
+        let _twice = once.format_for_latex(&FormatterConfig::default());
         // Current implementation re-escapes already escaped sequences (not idempotent). Just assert first pass shape.
         assert!(once.contains("\\#"));
         assert!(once.contains("\\&"));
@@ -576,11 +594,20 @@ mod tests {
     #[test]
     fn greek_section_formatting() {
         use crate::formatters::Language;
-        let mut cfg = FormatterConfig::default();
-        cfg.language = Language::Greek;
-        let section = TextParent { name: None, kind: TextNodeKind::Section, subtexts: vec![Box::new(String::from("λόγος"))] };
+        let cfg = FormatterConfig {
+            language: Language::Greek,
+            ..FormatterConfig::default()
+        };
+        let section = TextParent {
+            name: None,
+            kind: TextNodeKind::Section,
+            subtexts: vec![Box::new(String::from("λόγος"))],
+        };
         let latex = section.format_for_latex(&cfg);
-        assert!(latex.contains("\\section*{Βιβλίος \\greekalpha{section}.}"), "Missing Greek section heading: {latex}");
+        assert!(
+            latex.contains("\\section*{Βιβλίος \\greekalpha{section}.}"),
+            "Missing Greek section heading: {latex}"
+        );
         assert!(latex.contains("λόγος"));
     }
 
@@ -588,21 +615,39 @@ mod tests {
     fn node_wrappers_label_symbol_speaker_highlight() {
         let cfg = FormatterConfig::default();
         // Label
-        let label = TextParent { name: None, kind: TextNodeKind::Label, subtexts: vec![Box::new(String::from("CAPUT"))] };
+        let label = TextParent {
+            name: None,
+            kind: TextNodeKind::Label,
+            subtexts: vec![Box::new(String::from("CAPUT"))],
+        };
         let label_out = label.format_for_latex(&cfg);
         assert_eq!(label_out, "\\textbf{CAPUT} ");
         // Symbol wraps italics
-        let symbol = TextParent { name: None, kind: TextNodeKind::Symbol, subtexts: vec![Box::new(String::from("X"))] };
+        let symbol = TextParent {
+            name: None,
+            kind: TextNodeKind::Symbol,
+            subtexts: vec![Box::new(String::from("X"))],
+        };
         let symbol_out = symbol.format_for_latex(&cfg);
         assert_eq!(symbol_out, "\\textit{X}");
         // Speaker
-        let speaker = TextParent { name: None, kind: TextNodeKind::Speaker, subtexts: vec![Box::new(String::from("SOCRATES"))] };
+        let speaker = TextParent {
+            name: None,
+            kind: TextNodeKind::Speaker,
+            subtexts: vec![Box::new(String::from("SOCRATES"))],
+        };
         let speaker_out = speaker.format_for_latex(&cfg);
         assert!(speaker_out.starts_with("\\vspace{6pt}"));
         assert!(speaker_out.contains("SOCRATES"));
-        assert!(speaker_out.ends_with("· \\\\"), "Speaker ending mismatch: {speaker_out}");
+        assert!(
+            speaker_out.ends_with("· \\\\"),
+            "Speaker ending mismatch: {speaker_out}"
+        );
         // Highlight italics
-        let highlight = Highlight { rend: "italics".into(), text: Box::new(String::from("verbum")) };
+        let highlight = Highlight {
+            rend: "italics".into(),
+            text: Box::new(String::from("verbum")),
+        };
         let hi_out = highlight.format_for_latex(&cfg);
         assert!(hi_out.contains(" \\textit{verbum} "));
     }
@@ -610,20 +655,44 @@ mod tests {
     #[test]
     fn milestone_filters_page_and_speech() {
         let cfg = FormatterConfig::default();
-        let m1 = Milestone { unit: "page".into(), number: Some("1".into()), ed: None, resp: None }.format_for_latex(&cfg);
-        let m2 = Milestone { unit: "speech".into(), number: Some("2".into()), ed: None, resp: None }.format_for_latex(&cfg);
+        let m1 = Milestone {
+            unit: "page".into(),
+            number: Some("1".into()),
+            ed: None,
+            resp: None,
+        }
+        .format_for_latex(&cfg);
+        let m2 = Milestone {
+            unit: "speech".into(),
+            number: Some("2".into()),
+            ed: None,
+            resp: None,
+        }
+        .format_for_latex(&cfg);
         assert!(m1.is_empty());
         assert!(m2.is_empty());
-        let m3 = Milestone { unit: "line".into(), number: Some("3".into()), ed: None, resp: None }.format_for_latex(&cfg);
+        let m3 = Milestone {
+            unit: "line".into(),
+            number: Some("3".into()),
+            ed: None,
+            resp: None,
+        }
+        .format_for_latex(&cfg);
         assert_eq!(m3, "\\refnumber{3}");
     }
 
     #[test]
     fn paragraph_adds_trailing_blank_lines() {
         let cfg = FormatterConfig::default();
-        let para = TextParent { name: None, kind: TextNodeKind::Paragraph, subtexts: vec![Box::new(String::from("abc"))] };
+        let para = TextParent {
+            name: None,
+            kind: TextNodeKind::Paragraph,
+            subtexts: vec![Box::new(String::from("abc"))],
+        };
         let out = para.format_for_latex(&cfg);
-        assert!(out.ends_with("\n\n"), "Paragraph not terminated with blank line: {out}");
+        assert!(
+            out.ends_with("\n\n"),
+            "Paragraph not terminated with blank line: {out}"
+        );
     }
 }
-

@@ -8,16 +8,11 @@ pub struct Work {
     pub text: TextParent,
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, Serialize, Deserialize, Default)]
 pub enum Language {
+    #[default]
     Latin,
     Greek,
-}
-
-impl Default for Language {
-    fn default() -> Self {
-        Self::Latin
-    }
 }
 
 pub trait TextFormatter {

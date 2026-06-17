@@ -41,6 +41,12 @@ impl Latex {
     }
 }
 
+impl Default for Latex {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl TextFormatter for Latex {
     fn set_title(&mut self, title: Option<String>) {
         self.config.title = title.map(|x| x.format_for_latex(&self.config));
@@ -237,18 +243,18 @@ impl TextFormatter for Latex {
 ",
             );
         }
-        text.push_str("}");
+        text.push('}');
 
         if let Some(author) = self.config.author.as_ref() {
             text.push_str(r"\author{");
-            text.push_str(&author);
-            text.push_str(r"}");
+            text.push_str(author);
+            text.push('}');
         }
 
         if let Some(title) = self.config.title.as_ref() {
             text.push_str(r"\title{");
-            text.push_str(&title);
-            text.push_str(r"}");
+            text.push_str(title);
+            text.push('}');
         }
 
         text.push_str(

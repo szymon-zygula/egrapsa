@@ -76,24 +76,6 @@ impl ScaifeSource for ScaifeUrn {
 
 pub struct Scaife {}
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::text::TextNode;
-
-    #[test]
-    fn parses_minimal_file_source() {
-        let xml = r#"<?xml version="1.0"?><?proc instruct?><TEI><teiHeader></teiHeader><text><body><div type="edition"><div type="textpart" subtype="book"><div type="textpart" subtype="section"><p>et</p></div></div></div></body></text></TEI>"#;
-        let path = "tests/fixtures/minimal_inline.xml";
-        std::fs::create_dir_all("tests/fixtures").unwrap();
-        std::fs::write(path, xml).unwrap();
-        let scaife = Scaife {};
-        let text = scaife.get_text(&format!("file:{path}")).expect("parse ok");
-        let rendered = text.to_string();
-        assert!(rendered.contains("et"));
-    }
-}
-
 impl Scaife {
     fn text_url(id: &str) -> String {
         format!("https://scaife.perseus.org/library/{}/cts-api-xml", id)
@@ -179,7 +161,7 @@ fn skip_expect_pi(reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>) {
     };
 }
 
-fn expect_closing_tag<'a>(reader: &mut Reader<&[u8]>, buf: &'a mut Vec<u8>, tag_name: &str) {
+fn expect_closing_tag(reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>, tag_name: &str) {
     match reader.read_event_into(buf) {
         Ok(Event::End(e)) if e.name().0 == tag_name.as_bytes() => (),
         Err(e) => panic!("Expected tag </{tag_name}>, got error: {e}"),
@@ -238,7 +220,7 @@ fn read_text(reader: &mut Reader<&[u8]>, buf: &mut Vec<u8>, start_tag: BytesStar
                     let text = read_text(reader, buf, tag);
                     name = Some(Box::new(text));
                 }
-                name @ _ => {
+                name => {
                     panic!("Unexpected tag found inside section: <{}>", name)
                 }
             },
@@ -304,20 +286,20 @@ fn read_empty_tag(tag: &BytesStart) -> Box<dyn TextNode> {
         // Seems to be some junk.
         "l" | "p" | "sic" => Box::new(""),
         "pb" => {
-            if let Some(x) = get_attr_val_opt(&tag, "n") {
+            if let Some(x) = get_attr_val_opt(tag, "n") {
                 Box::new(ParagraphNumber(x))
             } else {
                 Box::new("")
             }
         }
         "lb" => {
-            if let Some(x) = get_attr_val_opt(&tag, "n") {
+            if let Some(x) = get_attr_val_opt(tag, "n") {
                 Box::new(LineNumber(x))
             } else {
                 Box::new("")
             }
         }
-        "note" => Box::new(MarginNote(get_attr_val(&tag, "n"))),
+        "note" => Box::new(MarginNote(get_attr_val(tag, "n"))),
         "gap" => {
             let reason = get_attr_val(tag, "reason");
             let rend = get_attr_val_opt(tag, "rend");
@@ -336,7 +318,7 @@ fn read_empty_tag(tag: &BytesStart) -> Box<dyn TextNode> {
             })
         }
         "space" => Box::new(" "),
-        name @ _ => {
+        name => {
             panic!("Unexpected empty tag found inside section: <{}/>", name)
         }
     }
@@ -394,5 +376,23 @@ fn get_text_kind(tag: &BytesStart) -> TextNodeKind {
             name => panic!("Invalid div type for text kind: {name}"),
         },
         name => panic!("Invalid tag type for text kind: {name}"),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::text::TextNode;
+
+    #[test]
+    fn parses_minimal_file_source() {
+        let xml = r#"<?xml version="1.0"?><?proc instruct?><TEI><teiHeader></teiHeader><text><body><div type="edition"><div type="textpart" subtype="book"><div type="textpart" subtype="section"><p>et</p></div></div></div></body></text></TEI>"#;
+        let path = "tests/fixtures/minimal_inline.xml";
+        std::fs::create_dir_all("tests/fixtures").unwrap();
+        std::fs::write(path, xml).unwrap();
+        let scaife = Scaife {};
+        let text = scaife.get_text(&format!("file:{path}")).expect("parse ok");
+        let rendered = text.to_string();
+        assert!(rendered.contains("et"));
     }
 }

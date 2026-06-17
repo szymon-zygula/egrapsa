@@ -76,9 +76,7 @@ impl Config {
     }
 
     pub fn source(&self) -> Box<dyn TextSource> {
-        let source = self.source_type.get_source();
-
-        source
+        self.source_type.get_source()
     }
 
     pub fn formatter(&self) -> Box<dyn TextFormatter> {
