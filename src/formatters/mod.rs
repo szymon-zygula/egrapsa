@@ -20,6 +20,20 @@ impl Default for Language {
     }
 }
 
+#[derive(Clone, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum Typography {
+    Modern,
+    Old,
+    VeryOld,
+}
+
+impl Default for Typography {
+    fn default() -> Self {
+        Self::VeryOld  // Maintain current behavior as default
+    }
+}
+
 pub trait TextFormatter {
     fn set_title(&mut self, title: Option<String>);
     fn set_author(&mut self, author: Option<String>);
@@ -27,6 +41,7 @@ pub trait TextFormatter {
     fn set_margin_notes(&mut self, margin_notes: bool);
     fn set_footnotes(&mut self, footnotes: bool);
     fn set_language(&mut self, language: Language);
+    fn set_typography(&mut self, typography: Typography);
     fn add_work(&mut self, work: Work);
     fn format(&self) -> String;
 }
